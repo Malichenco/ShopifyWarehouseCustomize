@@ -1,0 +1,184 @@
+{%- capture section_settings -%}
+{
+  "showNewsletter": {{ section.settings.show_newsletter | json }}
+}
+{%- endcapture -%}
+
+<section data-section-id="{{ section.id }}" data-section-type="announcement-bar" data-section-settings='{{ section_settings }}'>
+  {%- if section.settings.show_newsletter -%}
+    <div id="announcement-bar-newsletter" class="announcement-bar__newsletter hidden-phone" aria-hidden="true">
+      <div class="container">
+        <div class="announcement-bar__close-container">
+          <button class="announcement-bar__close" data-action="toggle-newsletter">
+            <span class="visually-hidden">{{ 'general.accessibility.close' | t }}</span>
+            {%- render 'icon', icon: 'close' -%}
+          </button>
+        </div>
+      </div>
+
+      <div class="container container--extra-narrow">
+        <div class="announcement-bar__newsletter-inner">
+          {%- if section.settings.newsletter_title != blank -%}
+            <h2 class="heading h1">{{ section.settings.newsletter_title | escape }}</h2>
+          {%- endif -%}
+
+          {%- if section.settings.newsletter_content != blank -%}
+            <div class="rte">
+              {{ section.settings.newsletter_content }}
+            </div>
+          {%- endif -%}
+
+          {%- assign newsletter_id = 'newsletter-' | append: section.id -%}
+
+          <div class="newsletter">
+            {%- form 'customer', id: newsletter_id, class: 'form newsletter__form' -%}
+              {%- if form.posted_successfully? -%}
+                <p class="alert alert--success alert--center">{{ 'home_page.newsletter.success' | t }}</p>
+                {%- if form.context == 'announcement-bar' -%}
+                  {%- assign open_announcement = true -%}
+                {%- endif -%}
+              {%- else -%}
+                {%- if form.errors -%}
+                  <p class="alert alert--error">{{ form.errors.messages['email'] }}</p>
+                {%- endif -%}
+
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <input type="hidden" name="contact[context]" value="announcement-bar">
+
+                <div class="form__input-row">
+                  <div class="form__input-wrapper form__input-wrapper--labelled">
+                    <input type="email" id="announcement[contact][email]" name="contact[email]" class="form__field form__field--text" autofocus required>
+                    <label for="announcement[contact][email]" class="form__floating-label">{{ 'home_page.newsletter.input' | t }}</label>
+                  </div>
+
+                  <button type="submit" class="form__submit button button--primary">{{ 'home_page.newsletter.submit' | t }}</button>
+                </div>
+              {%- endif -%}
+            {%- endform -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+
+  <div class="announcement-bar">
+    <div class="container">
+      <div class="announcement-bar__inner">
+        {%- if section.settings.link != blank -%}
+          <a href="{{ section.settings.link }}" class="announcement-bar__content announcement-bar__content--{{ section.settings.text_position }}">{{ section.settings.text | escape }}</a>
+        {%- else -%}
+          <p class="announcement-bar__content announcement-bar__content--{{ section.settings.text_position }}">{{ section.settings.text | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.show_newsletter -%}
+          <button type="button" class="announcement-bar__button hidden-phone" data-action="toggle-newsletter" aria-expanded="false" aria-controls="announcement-bar-newsletter">
+            {%- render 'icon', icon: 'newsletter' -%}
+            {{- section.settings.newsletter_button | escape -}}
+          </button>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .announcement-bar {
+    background: {{ section.settings.background }};
+    color: {{ section.settings.text_color }};
+  }
+</style>
+
+<script>
+  {%- if section.settings.show_newsletter -%}
+    document.documentElement.style.setProperty('--announcement-bar-button-width', document.querySelector('.announcement-bar__button').clientWidth + 'px');
+  {%- else -%}
+    document.documentElement.style.removeProperty('--announcement-bar-button-width');
+  {%- endif -%}
+
+  document.documentElement.style.setProperty('--announcement-bar-height', document.getElementById('shopify-section-{{ section.id }}').clientHeight + 'px');
+</script>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "class": "shopify-section--announcement-bar",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#1e2d7d"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Text",
+      "default": "Announce something here"
+    },
+    {
+      "type": "select",
+      "id": "text_position",
+      "label": "Text position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "left",
+      "info": "Text is always centered on mobile."
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "paragraph",
+      "content": "Customers who subscribe will have their email address added to the \"accepts marketing\" [customer list](/admin/customers?query=&accepts_marketing=1)."
+    },
+    {
+      "type": "paragraph",
+      "content": "Only visible on desktop."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Show sign up form",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Open button",
+      "default": "Subscribe & Save"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_title",
+      "label": "Heading",
+      "default": "Newsletter"
+    },
+    {
+      "type": "richtext",
+      "id": "newsletter_content",
+      "label": "Text",
+      "default": "<p>A short sentence describing what someone will receive by subscribing</p>"
+    }
+  ]
+}
+{% endschema %}

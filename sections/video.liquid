@@ -1,0 +1,64 @@
+<section class="section section--text-centered" data-section-id="{{ section.id }}" data-section-type="video">
+  <div class="container">
+    {%- if section.settings.title != blank -%}
+      <h2 class="heading h3">{{ section.settings.title | escape }}</h2>
+    {%- endif -%}
+
+    <div class="video-item" data-action="play-video">
+      <div class="video-wrapper">
+        <div class="video-wrapper__image-wrapper">
+          {%- if section.settings.image -%}
+            {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 860px)', widths: '300,400,500,600,700,800,900,1000,1200', class: 'video-wrapper__image' -}}
+          {%- elsif bsectionlock.settings.video_url.type == 'youtube' -%}
+            <img class="video-wrapper__image" src="https://img.youtube.com/vi/{{ section.settings.video_url.id }}/maxresdefault.jpg" alt="">
+          {%- else -%}
+            <div class="placeholder-background">
+              {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+            </div>
+          {%- endif -%}
+
+          {% render 'icon', icon: 'play' %}
+        </div>
+
+        {% if section.settings.video_url.type == 'youtube' %}
+          <iframe data-src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&showinfo=0&controls=1&rel=0&modestbranding=1" frameborder="0" allowfullscreen></iframe>
+        {% elsif section.settings.video_url.type == 'vimeo' %}
+          <iframe data-src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?autoplay=1&portrait=0&byline=0&color={{ settings.accent_color | remove_first: '#' }}" frameborder="0"></iframe>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Video",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Videos"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url",
+      "accept": ["vimeo", "youtube"],
+      "label": "Video",
+      "default": "https://www.youtube.com/watch?v=_9VUPq3SxOc"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "1200 x 700px .jpg recommended. Used when video is not loaded (required for Vimeo and YouTube)."
+    }
+  ],
+  "presets": [
+    {
+      "category": "Video",
+      "name": "Video"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,34 @@
+<privacy-banner class="cookie-bar" aria-hidden="true">
+  <div class="container">
+    <div class="cookie-bar__inner">
+      <div class="cookie-bar__text rte">
+        {{- section.settings.text -}}
+      </div>
+
+      <div class="cookie-bar__choice-container">
+        <div class="button-group button-group--fit">
+          <button type="button" class="cookie-bar__button button button--primary" data-action="accept-terms">{{ 'footer.cookie_bar.accept' | t }}</button>
+          <button type="button" class="cookie-bar__button button button--secondary" data-action="decline-terms">{{ 'footer.cookie_bar.decline' | t }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</privacy-banner>
+
+{% schema %}
+{
+  "name": "Privacy banner",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Privacy bar will only be visible if it fulfills the conditions of the [Shopify Customer Privacy API](https://shopify.dev/docs/themes/consent-tracking-api) or inside the theme editor to ease editing."
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Use this bar to show information about your cookie policy.</p>"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,109 @@
+{%- comment -%}
+This create a placeholder for product item, and is used exclusively on home page for the onboarding process
+{%- endcomment -%}
+
+{%- assign modulo_on_sale = forloop.index0 | modulo: 2 -%}
+
+{% if modulo_on_sale == 0 %}
+  {%- assign on_sale = true -%}
+{%- else -%}
+  {%- assign on_sale = false -%}
+{%- endif -%}
+
+{%- capture random_price -%}{% cycle 7700, 4400, 7349, 4000, 3000, 3999 %}{%- endcapture -%}
+{%- assign random_compare_at_price = random_price | plus: 1000 -%}
+
+<div class="product-item {% if horizontal %}product-item--horizontal{% elsif list %}product-item--list{% else %}product-item--vertical{% endif %} {{ grid_classes }}">
+  {%- capture product_labels -%}
+    {%- if settings.show_discount and on_sale -%}
+      {%- if settings.discount_mode == 'percentage' -%}
+        {%- assign savings = random_compare_at_price | minus: random_price | times: 100.0 | divided_by: random_compare_at_price | round | append: '%' -%}
+      {%- else -%}
+        {%- capture savings -%}<span>{{ random_compare_at_price | minus: random_price | money }}</span>{%- endcapture -%}
+      {%- endif -%}
+
+      <span class="product-label product-label--on-sale">{{ 'collection.product.discount_html' | t: savings: savings }}</span>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- if product_labels != blank -%}
+    <div class="product-item__label-list">
+      {{- product_labels -}}
+    </div>
+  {%- endif -%}
+
+  <a href="#" class="product-item__image-wrapper">
+    {%- capture placeholder -%}{% cycle 'product-1', 'product-2', 'product-3', 'product-4', 'product-5', 'product-6' %}{% endcapture %}
+    {{- placeholder | placeholder_svg_tag: 'placeholder-svg' -}}
+  </a>
+
+  <div class="product-item__info">
+    <div class="product-item__info-inner">
+      {%- capture price_list -%}
+        <div class="product-item__price-list price-list">
+          {%- if on_sale -%}
+            <span class="price price--highlight">{{ random_price | money }}</span>
+            <span class="price price--compare">{{ random_compare_at_price | money }}</span>
+          {%- else -%}
+            <span class="price">{{ random_price | money }}</span>
+          {%- endif -%}
+        </div>
+      {%- endcapture -%}
+
+      {%- capture vendor -%}
+        {%- if settings.show_vendor -%}
+          <a class="product-item__vendor link" href="#">{{ 'home_page.onboarding.vendor_title' | t }}</a>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- if settings.product_price_position == 'before_title' -%}
+        {{ price_list }}
+      {%- endif -%}
+
+      {%- if settings.product_price_position == 'after_title' -%}
+        {{ vendor }}
+      {%- endif -%}
+
+      <h2 class="product-item__title text--strong">
+        <a href="#" class="link">{{ 'home_page.onboarding.product_title' | t }}</a>
+      </h2>
+
+      {%- if settings.product_price_position == 'before_title' -%}
+        {{ vendor }}
+      {%- endif -%}
+
+      {%- if settings.product_price_position == 'after_title' -%}
+        {{ price_list }}
+      {%- endif -%}
+
+      {%- if settings.show_reviews_badge -%}
+        <div class="product-item__reviews-badge">
+          <div class="rating">
+            <div class="rating__stars" role="img" aria-label="{{ 'general.accessibility.star_reviews_info' | t: rating_value: 5, rating_max: 5 }}">
+              {%- for i in (1..5) -%}
+                {%- render 'icon' with 'rating-star', class: 'rating__star rating__star--full' -%}
+              {%- endfor -%}
+            </div>
+
+            <span class="rating__caption">{{ 'product.general.reviews_count' | t: count: 2 }}</span>
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if settings.show_inventory_quantity -%}
+        {%- capture random_inventory -%}{% cycle 1, 24, 10, 150, 40, 38 %}{%- endcapture -%}
+        {%- assign random_inventory = random_inventory | times: 1 -%}
+
+        {%- if settings.low_inventory_threshold > 0 -%}
+          {%- if random_inventory <= settings.low_inventory_threshold or random_inventory <= settings.low_inventory_threshold -%}
+            <span class="product-item__inventory inventory inventory--low">{{ 'collection.product.low_stock_with_quantity_count' | t: count: random_inventory }}</span>
+          {%- else -%}
+            <span class="product-item__inventory inventory inventory--high">{{ 'collection.product.in_stock_with_quantity_count' | t: count: random_inventory }}</span>
+          {%- endif -%}
+        {%- else -%}
+          <span class="product-item__inventory inventory inventory--high">{{ 'collection.product.in_stock' | t }}</span>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+</div>

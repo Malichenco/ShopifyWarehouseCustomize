@@ -1,0 +1,112 @@
+<section class="section" data-section-id="{{ section.id }}" data-section-type="image-with-text">
+  <div class="container">
+    {%- capture image -%}
+      <div class="image-with-text__image-container" style="width: {{ section.settings.image_width }}%;">
+        {%- if section.settings.image -%}
+          {{- section.settings.image | image_url: width: section.settings.image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 520px)', widths: '300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000' -}}
+        {%- else -%}
+          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+        {%- endif -%}
+      </div>
+    {%- endcapture -%}
+
+    {%- capture text -%}
+      <div class="image-with-text__text-container">
+        <div class="image-with-text__text-aligner">
+          {%- if section.settings.title != blank -%}
+            <h2 class="heading h3">{{ section.settings.title | escape }}</h2>
+          {%- endif -%}
+
+          <div class="rte">
+            {{ section.settings.content }}
+
+            {%- if section.settings.button_link != blank and section.settings.button_text != blank -%}
+              <a href="{{ section.settings.button_link }}" class="button button--primary">{{ section.settings.button_text | escape }}</a>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endcapture -%}
+
+    <div class="image-with-text">
+      {%- if section.settings.image_position == 'left' -%}
+        {{ image }}
+        {{ text }}
+      {%- else -%}
+        {{ text }}
+        {{ image }}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Image with text",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "1200 x 800px .jpg recommended"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Image position",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 20,
+      "max": 70,
+      "step": 5,
+      "unit": "%",
+      "label": "Image width",
+      "default": 50
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Your title"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Text",
+      "default": "<p>Use this text to share information about your brand with your customers.<br>Describe a product, share announcements, or welcome customers to your store.</p>"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Our products"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link",
+      "default": "/collections/all"
+    }
+  ],
+  "presets": [
+    {
+      "category": "Image",
+      "name": "Image with text",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

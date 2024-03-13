@@ -1,0 +1,84 @@
+.section {
+  display: flex;
+  justify-content: center;
+}
+.container {
+  /* max-width: 100%; */
+  width: 100%;
+}
+.slide {
+  margin-left: 0 !important;
+  width: 100%;
+}
+.row {
+    --bs-gutter-x: 30px;
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: calc(-1 * var(--bs-gutter-y));
+    margin-right: calc(-.5 * var(--bs-gutter-x));
+    margin-left: calc(-.5 * var(--bs-gutter-x));
+}
+.text-center.pb224.pt224.o_colored_level.o_background_video.oe_img_bg.o_bg_img_center {
+    display: flex;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    justify-content: center;
+    background-position: center;
+    background-position-x: center;
+    background-position-y: center;
+    background-size: cover;
+    object-fit: cover;
+    padding-bottom: 10% !important;
+    position: relative;
+    padding-top: 10% !important;
+    text-align: center !important;
+    width: 50%;
+    max-width: 100%;
+}
+.o_bg_video_container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    position: absolute !important;
+    display: block;
+    /* width: 50%; */
+    object-fit: cover;
+    overflow: hidden;
+    background: no-repeat;
+    pointer-events: none;
+    -webkit-box-direction: normal;
+    text-align: center;
+}
+.text-center.pb224.pt224.o_colored_level.o_background_video.oe_img_bg.o_bg_img_center.col-lg-6 p {
+   color: #5c5c5c;
+}
+main.Online-Store-UI-MainArea_15wjo Online-Store-UI-MainArea--usesBottomSheet_lza5e {
+  padding: 0 !important;
+}
+@media (max-width: 768px) {
+  .text-center.pb224.pt224.o_colored_level.o_background_video.oe_img_bg.o_bg_img_center {
+    width: 100%;
+  }
+  .col-lg-4 {
+    height: 230px;
+  }
+}
+
+/* Product Details Link Button */
+.product-block-list__item--description .card__section a {
+   background-color: #3f6e7c;
+   color: #fff;
+   font-size: 16px;
+   padding: 10px 30px;
+   text-align: center;
+   display: inline-block;
+   text-decoration: none;
+}
+.product-block-list__item--description .card__section a:hover {
+   background: #335c68;
+   color: #fff;
+}
+/* End Link Button */

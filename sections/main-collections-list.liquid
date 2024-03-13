@@ -1,0 +1,369 @@
+<section data-section-id="{{ section.id }}" data-section-type="list-collections">
+  <div class="container">
+    <div class="page__sub-header">
+      <nav aria-label="{{ 'general.breadcrumb.title' | t }}" class="breadcrumb">
+        <ol class="breadcrumb__list" role="list">
+          <li class="breadcrumb__item">
+            <a class="breadcrumb__link link" href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a> {%- render 'icon', icon: 'arrow-right' -%}
+          </li>
+
+          <li class="breadcrumb__item">
+            <span class="breadcrumb__link">{{ 'collection.general.all_collections' | t }}</span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    {%- assign has_brand_collections = false -%}
+    {%- assign has_normal_collections = false -%}
+
+    {%- if section.settings.collections_to_show == 'all' -%}
+      {%- for collection in collections -%}
+        {%- if collection.template_suffix contains 'brand' -%}
+          {%- assign has_brand_collections = true -%}
+        {%- else -%}
+          {%- assign has_normal_collections = true -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- if section.settings.collection_linklist != blank -%}
+        {%- for link in section.settings.collection_linklist.links -%}
+          {%- if link.type == 'collection_link' -%}
+            {%- if link.object.template_suffix contains 'brand' -%}
+              {%- assign has_brand_collections = true -%}
+            {%- else -%}
+              {%- assign has_normal_collections = true -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- for block in section.blocks -%}
+          {%- assign collection = block.settings.collection -%}
+
+          {%- if collection.template_suffix contains 'brand' -%}
+            {%- assign has_brand_collections = true -%}
+          {%- else -%}
+            {%- assign has_normal_collections = true -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- if has_normal_collections -%}
+      {%- paginate collections by 48 -%}
+        <div class="collection-list__section">
+          <header class="page__header page__header--stack page__header--centered">
+            <h1 class="page__title heading h1">
+              {%- if request.page_type == 'page' -%}
+                {{- page.title -}}
+              {%- else -%}
+                {{- 'collection.general.all_collections' | t -}}
+              {%- endif -%}
+            </h1>
+          </header>
+
+          <div class="grid">
+            {%- if section.settings.collections_to_show == 'all' -%}
+              {%- for collection in collections -%}
+                {%- unless collection.template_suffix contains 'brand' -%}
+                  <div class="grid__cell 1/2--tablet 1/3--lap-and-up">
+                    <a href="{{ collection.url }}" class="collection-block-item {% if section.settings.show_collection_overlay %}collection-block-item--overlay{% endif %}">
+                      <div class="aspect-ratio" style="padding-bottom: 45%">
+                        {{- collection.featured_image | image_url: width: collection.featured_image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 850px)', widths: '200,300,400,500,600,800,1000,1200,1400', class: 'collection-block-item__image image-background' -}}
+                      </div>
+
+                      {%- if section.settings.show_collection_title -%}
+                        <p class="collection-block-item__title heading h2">{{ collection.title }}</p>
+                      {%- endif -%}
+                    </a>
+                  </div>
+                {%- endunless -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- if section.settings.collection_linklist != blank -%}
+                {%- for link in section.settings.collection_linklist.links -%}
+                  {%- if link.type == 'collection_link' -%}
+                    {%- assign collection = link.object -%}
+
+                    {%- unless collection.template_suffix contains 'brand' -%}
+                      <div class="grid__cell 1/2--tablet 1/3--lap-and-up">
+                        <a href="{{ collection.url }}" class="collection-block-item {% if section.settings.show_collection_overlay %}collection-block-item--overlay{% endif %}" {{ block.shopify_attributes }}>
+                          <div class="aspect-ratio" style="padding-bottom: 45%">
+                            {{- collection.featured_image | image_url: width: collection.featured_image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 850px)', widths: '200,300,400,500,600,800,1000,1200,1400', class: 'collection-block-item__image image-background' -}}
+                          </div>
+
+                          {%- if section.settings.show_collection_title -%}
+                            <p class="collection-block-item__title heading h2">{{ collection.title }}</p>
+                          {%- endif -%}
+                        </a>
+                      </div>
+                    {%- endunless -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- else -%}
+                {%- for block in section.blocks -%}
+                  {%- assign collection = block.settings.collection -%}
+
+                  {%- unless collection.template_suffix contains 'brand' -%}
+                    <div class="grid__cell 1/2--tablet 1/3--lap-and-up">
+                      <a href="{{ collection.url }}" class="collection-block-item {% if section.settings.show_collection_overlay %}collection-block-item--overlay{% endif %}" {{ block.shopify_attributes }}>
+                        <div class="aspect-ratio" style="padding-bottom: 45%">
+                          {{- collection.featured_image | image_url: width: collection.featured_image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 850px)', widths: '200,300,400,500,600,800,1000,1200,1400', class: 'collection-block-item__image image-background' -}}
+                        </div>
+
+                        {%- if section.settings.show_collection_title -%}
+                          <p class="collection-block-item__title heading h2">{{ collection.title }}</p>
+                        {%- endif -%}
+                      </a>
+                    </div>
+                  {%- endunless -%}
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- if section.settings.collections_to_show == 'all' -%}
+          {%- render 'pagination', paginate: paginate -%}
+        {%- endif -%}
+      {%- endpaginate -%}
+    {%- endif -%}
+
+    {%- if has_brand_collections -%}
+      <div class="collection-list__section">
+        <header class="page__header page__header--stack page__header--centered">
+          <h1 class="page__title heading h1">{{ 'collection.general.brands' | t }}</h1>
+        </header>
+
+        <div class="quick-links">
+          {%- if section.settings.collections_to_show == 'all' -%}
+            {%- for collection in collections -%}
+              {%- if collection.template_suffix contains 'brand' -%}
+                {%- assign collection_image = collection.image | default: collection.products.first.featured_media -%}
+                {%- assign max_height_mobile = 50 -%}
+                {%- assign max_height_desktop = 90 -%}
+                {%- assign max_width_mobile = 100 | divided_by: collection_image.aspect_ratio | at_most: 100 -%}
+                {%- assign max_width_desktop = 140 | divided_by: collection_image.aspect_ratio | at_most: 140 -%}
+
+                {%- if collection_image.aspect_ratio < 1.5 -%}
+                  {%- if collection_image.height < max_height_desktop -%}
+                    {%- assign max_width_desktop = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                  {%- else -%}
+                    {%- assign max_width_desktop = max_height_desktop | times: collection_image.aspect_ratio | round -%}
+                  {%- endif -%}
+
+                  {%- if collection_image.height < max_height_mobile -%}
+                    {%- assign max_width_mobile = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                  {%- else -%}
+                    {%- assign max_width_mobile = max_height_mobile | times: collection_image.aspect_ratio | round -%}
+                  {%- endif -%}
+                {%- elsif collection_image.aspect_ratio > 2.5 -%}
+                  {%- assign max_width_mobile = 100 -%}
+                  {%- assign max_width_desktop = 140 -%}
+                {%- endif -%}
+
+                <a id="block-{{ forloop.index0 }}" href="{{ collection.url }}" class="quick-links__link">
+                  <div  class="quick-links__image-container">
+                    <div class="quick-links__image-ie-fix">
+                      {{- collection_image | image_url: width: collection_image.width | image_tag: loading: 'lazy', sizes: '240px', widths: '240,480,720' -}}
+                    </div>
+                  </div>
+                </a>
+
+                <style>
+                  #block-{{ forloop.index0 }} .quick-links__image-ie-fix {
+                    max-width: {{ max_width_mobile }}px;
+                  }
+
+                  @media screen and (min-width: 641px)  {
+                    #block-{{ forloop.index0 }} .quick-links__image-ie-fix {
+                      max-width: {{ max_width_desktop }}px;
+                    }
+                  }
+                </style>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- else -%}
+            {% if section.settings.collection_linklist != blank %}
+              {%- for link in section.settings.collection_linklist.links -%}
+                {%- if link.type == 'collection_link' -%}
+                  {%- assign collection = link.object -%}
+
+                  {%- if collection.template_suffix contains 'brand' -%}
+                    {%- assign collection_image = collection.image | default: collection.products.first.featured_media -%}
+                    {%- assign max_height_mobile = 50 -%}
+                    {%- assign max_height_desktop = 90 -%}
+                    {%- assign max_width_mobile = 100 | divided_by: collection_image.aspect_ratio | at_most: 100 -%}
+                    {%- assign max_width_desktop = 140 | divided_by: collection_image.aspect_ratio | at_most: 140 -%}
+
+                    {%- if collection_image.aspect_ratio < 1.5 -%}
+                      {%- if collection_image.height < max_height_desktop -%}
+                        {%- assign max_width_desktop = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                      {%- else -%}
+                        {%- assign max_width_desktop = max_height_desktop | times: collection_image.aspect_ratio | round -%}
+                      {%- endif -%}
+
+                      {%- if collection_image.height < max_height_mobile -%}
+                        {%- assign max_width_mobile = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                      {%- else -%}
+                        {%- assign max_width_mobile = max_height_mobile | times: collection_image.aspect_ratio | round -%}
+                      {%- endif -%}
+                    {%- elsif collection_image.aspect_ratio > 2.5 -%}
+                      {%- assign max_width_mobile = 100 -%}
+                      {%- assign max_width_desktop = 140 -%}
+                    {%- endif -%}
+
+                    <a id="block-{{ forloop.index0 }}" href="{{ collection.url }}" class="quick-links__link">
+                      <div  class="quick-links__image-container">
+                        <div class="quick-links__image-ie-fix">
+                          {{- collection_image | image_url: width: collection_image.width | image_tag: loading: 'lazy', sizes: '240px', widths: '240,480,720' -}}
+                        </div>
+                      </div>
+                    </a>
+
+                    <style>
+                      #block-{{ forloop.index0 }} .quick-links__image-ie-fix {
+                        max-width: {{ max_width_mobile }}px;
+                      }
+
+                      @media screen and (min-width: 641px)  {
+                        #block-{{ forloop.index0 }} .quick-links__image-ie-fix {
+                          max-width: {{ max_width_desktop }}px;
+                        }
+                      }
+                    </style>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+            {%- else -%}
+              {%- for block in section.blocks -%}
+                {%- assign collection = block.settings.collection -%}
+
+                {%- if collection.template_suffix contains 'brand' -%}
+                  {%- assign collection_image = collection.image | default: collection.products.first.featured_media -%}
+                  {%- assign max_height_mobile = 50 -%}
+                  {%- assign max_height_desktop = 90 -%}
+                  {%- assign max_width_mobile = 100 | divided_by: collection_image.aspect_ratio | at_most: 100 -%}
+                  {%- assign max_width_desktop = 140 | divided_by: collection_image.aspect_ratio | at_most: 140 -%}
+
+                  {%- if collection_image.aspect_ratio < 1.5 -%}
+                    {%- if collection_image.height < max_height_desktop -%}
+                      {%- assign max_width_desktop = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                    {%- else -%}
+                      {%- assign max_width_desktop = max_height_desktop | times: collection_image.aspect_ratio | round -%}
+                    {%- endif -%}
+
+                    {%- if collection_image.height < max_height_mobile -%}
+                      {%- assign max_width_mobile = collection_image.width | times: collection_image.aspect_ratio | round -%}
+                    {%- else -%}
+                      {%- assign max_width_mobile = max_height_mobile | times: collection_image.aspect_ratio | round -%}
+                    {%- endif -%}
+                  {%- elsif collection_image.aspect_ratio > 2.5 -%}
+                    {%- assign max_width_mobile = 100 -%}
+                    {%- assign max_width_desktop = 140 -%}
+                  {%- endif -%}
+
+                  <a id="block-{{ block.id }}" href="{{ collection.url }}" class="quick-links__link" {{ block.shopify_attributes }}>
+                    <div  class="quick-links__image-container">
+                      <div class="quick-links__image-ie-fix">
+                        {{- collection_image | image_url: width: collection_image.width | image_tag: loading: 'lazy', sizes: '240px', widths: '240,480,720' -}}
+                      </div>
+                    </div>
+                  </a>
+
+                  <style>
+                    #block-{{ block.id }} .quick-links__image-ie-fix {
+                      max-width: {{ max_width_mobile }}px;
+                    }
+
+                    @media screen and (min-width: 641px)  {
+                      #block-{{ block.id }} .quick-links__image-ie-fix {
+                        max-width: {{ max_width_desktop }}px;
+                      }
+                    }
+                  </style>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
+          {%- endif -%}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <style>
+    #shopify-section-{{ section.id }} .collection-block-item--overlay::before {
+      {%- assign overlay_opacity = section.settings.collection_overlay_opacity | divided_by: 100.0 -%}
+      background: {{ '#000000' | color_modify: 'alpha', overlay_opacity }}
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Collections list",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "You can [learn more](https://support.maestrooo.com/article/185-collection-how-to-use-the-brand-template) about how to set up brand collections."
+    },
+    {
+      "type": "radio",
+      "id": "collections_to_show",
+      "label": "Show collections",
+      "options": [
+        {
+          "value": "all",
+          "label": "All"
+        },
+        {
+          "value": "selected",
+          "label": "Selected"
+        }
+      ],
+      "default": "all"
+    },
+    {
+      "type": "link_list",
+      "id": "collection_linklist",
+      "label": "Menu",
+      "info": "If you hit the block limit, use a menu to showcase more collections. Each link must reference a collection."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_title",
+      "label": "Show collection title",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_overlay",
+      "label": "Show collection overlay",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "collection_overlay_opacity",
+      "label": "Overlay opacity",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 20
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

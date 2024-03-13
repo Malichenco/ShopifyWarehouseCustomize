@@ -1,0 +1,107 @@
+{%- if section.settings.desktop_navigation_layout == 'condensed' -%}
+  {%- assign is_condensed = true -%}
+{%- else -%}
+  {%- assign is_condensed = false -%}
+{%- endif -%}
+
+{%- assign downcase_title = mega_menu.title | downcase | strip -%}
+{%- assign mega_menu_block = nil -%}
+
+{%- for block in section.blocks -%}
+  {%- assign downcase_block_menu_item = block.settings.menu_item | downcase | strip -%}
+
+  {%- if downcase_block_menu_item == downcase_title -%}
+    {%- assign mega_menu_block = block -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div id="{{ index }}" class="mega-menu {% if is_floating %}mega-menu--floating{% endif %}" data-type="menu" aria-hidden="true" role="list" {{ mega_menu_block.shopify_attributes }}>
+  {%- capture mega_menu_inner -%}
+    {%- assign should_center = false -%}
+
+    {%- unless is_floating -%}
+      {%- assign should_center = true -%}
+    {%- endunless -%}
+
+    {%- assign has_two_images = false -%}
+
+    {%- if mega_menu_block.settings.image_1 != blank and mega_menu_block.settings.image_2 != blank -%}
+      {%- assign has_two_images = true -%}
+    {%- endif -%}
+
+    {%- assign mega_menu_classes = '' -%}
+
+    {%- if should_center and mega_menu.links.size <= 4 -%}
+      {%- if has_two_images -%}
+        {%- assign mega_menu_classes = 'mega-menu__inner--center' -%}
+      {%- else -%}
+        {%- assign mega_menu_classes = 'mega-menu__inner--center mega-menu__inner--large' -%}
+      {%- endif -%}
+    {%- endif -%}
+
+    <div class="mega-menu__inner {{ mega_menu_classes }}">
+      {%- if mega_menu.links.size > 0 -%}
+        {%- capture mega_menu_columns -%}
+          {%- for link in mega_menu.links -%}
+            <div class="mega-menu__column">
+              <a href="{{ link.url }}" class="mega-menu__title heading">{{ link.title }}</a>
+
+              {%- if link.links.size > 0 -%}
+                <ul class="mega-menu__linklist" role="list">
+                  {%- for sub_link in link.links -%}
+                    <li class="mega-menu__item">
+                      <a href="{{ sub_link.url }}" class="mega-menu__link link">{{ sub_link.title }}</a>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        {%- endcapture -%}
+
+        {%- if is_floating -%}
+          {%- comment -%}
+          IMPLEMENTATION NOTE: 230 is the size in pixel of a given column (it's 170 + 60 of margin). In order to avoid setting it in JS or
+                               having very complex HTML structure to achieve positioning, I used this trick.
+          {%- endcomment -%}
+          <div class="mega-menu__column-list" style="width: {{ 230 | times: mega_menu.links.size }}px">
+            {{- mega_menu_columns -}}
+          </div>
+        {%- else -%}
+          {{- mega_menu_columns -}}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- if mega_menu_block.settings.image_1 != blank -%}
+        <a href="{{ mega_menu_block.settings.image_1_link | default: '#' }}" class="mega-menu__promo">
+          <div class="mega-menu__image-wrapper">
+            {{- mega_menu_block.settings.image_1 | image_url: width: mega_menu_block.settings.image_1.width | image_tag: loading: 'lazy', sizes: '300px', widths: '300,600,900' -}}
+          </div>
+
+          <span class="mega-menu__image-heading heading h4">{{ mega_menu_block.settings.image_1_heading | escape }}</span>
+          <p class="mega-menu__image-text">{{ mega_menu_block.settings.image_1_text | escape }}</p>
+        </a>
+      {%- endif -%}
+
+      {%- if mega_menu_block.settings.image_2 != blank -%}
+        <a href="{{ mega_menu_block.settings.image_2_link | default: '#' }}" class="mega-menu__promo">
+          <div class="mega-menu__image-wrapper">
+            {{- mega_menu_block.settings.image_2 | image_url: width: mega_menu_block.settings.image_2.width | image_tag: loading: 'lazy', sizes: '300px', widths: '300,600,900' -}}
+          </div>
+
+          <span class="mega-menu__image-heading heading h4">{{ mega_menu_block.settings.image_2_heading | escape }}</span>
+          <p class="mega-menu__image-text">{{ mega_menu_block.settings.image_2_text | escape }}</p>
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endcapture -%}
+
+  {%- if is_condensed -%}
+    {{- mega_menu_inner -}}
+  {%- else -%}
+    <div class="container">
+      {{- mega_menu_inner -}}
+    </div>
+  {%- endif -%}
+</div>

@@ -1,0 +1,318 @@
+<section class="section" data-section-id="{{ section.id }}" data-section-type="mosaic">
+  <div class="container">
+    {%- for block in section.blocks -%}
+      {%- capture block_capture -%}
+        <div class="mosaic__item">
+          <a {% if block.settings.link %}href="{{ block.settings.link }}"{% endif %} id="block-{{ block.id }}" class="promo-block promo-block--{{ block.settings.content_position | replace: '_', '-' }} {% if block.settings.show_overlay %}promo-block--overlay{% endif %}" {{ block.shopify_attributes }}>
+            <div class="promo-block__image-clip">
+              <div class="promo-block__image-wrapper promo-block__image-wrapper--cover">
+                {%- if block.settings.image -%}
+                  {{ block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 560px)', widths: '200,300,400,500,600,800,1000,1200,1400,1600', class: 'image-background' }}
+                {%- else -%}
+                  <div class="placeholder-background">
+                    {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+
+            <div class="promo-block__inner">
+              {%- if block.settings.title != blank -%}
+                <p class="promo-block__heading heading h3">{{ block.settings.title | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.title != blank -%}
+                <p class="promo-block__content">{{ block.settings.content | escape | newline_to_br }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.link != blank and block.settings.button_text != blank -%}
+                <span class="promo-block__cta button button--floating">{{ block.settings.button_text | escape }}</span>
+              {%- endif -%}
+            </div>
+
+            <style>
+              #block-{{ block.id }} {
+                background-color: {{ block.settings.background }};
+                color: {{ block.settings.text_color }}
+              }
+
+              #block-{{ block.id }} .button {
+                background: {{ block.settings.button_background }};
+                color: {{ block.settings.button_text_color }};
+              }
+
+              {%- if block.settings.show_overlay -%}
+                #block-{{ block.id }}.promo-block--overlay::before {
+                  {%- assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0 -%}
+                  background: linear-gradient(to top, rgba(0, 0, 0, 0) 15%, {{ '#000000' | color_modify: 'alpha', overlay_opacity }});
+                }
+              {%- endif -%}
+            </style>
+
+            {%- if block.settings.image -%}
+              <noscript>
+                <style>
+                  #block-{{ block.id }} .promo-block__image-wrapper {
+                    background-image: url({{ block.settings.image | img_url: '800x' }});
+                  }
+                </style>
+              </noscript>
+            {%- endif -%}
+          </a>
+        </div>
+      {%- endcapture -%}
+
+      {%- if forloop.index == 1 -%}
+        {%- capture block_1 -%}{{ block_capture }}{%- endcapture -%}
+      {%- elsif forloop.index == 2 -%}
+        {%- capture block_2 -%}{{ block_capture }}{%- endcapture -%}
+      {%- elsif forloop.index == 3 -%}
+        {%- capture block_3 -%}{{ block_capture }}{%- endcapture -%}
+      {%- elsif forloop.index == 4 -%}
+        {%- capture block_4 -%}{{ block_capture }}{%- endcapture -%}
+      {%- elsif forloop.index == 5 -%}
+        {%- capture block_5 -%}{{ block_capture }}{%- endcapture -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%}We have accumulated all the different blocks, so now we simply create the columns based on the number of blocks{%- endcomment -%}
+
+    <div class="mosaic mosaic--{{ section.settings.section_size }} mosaic--{% if section.blocks.size == 1 %}one-column{% elsif section.blocks.size == 2 %}two-columns{% else %}three-columns{% endif %}">
+      {%- case section.blocks.size -%}
+        {%- when 1 or '1' -%}
+          <div class="mosaic__column">
+            {{ block_1 }}
+          </div>
+
+        {%- when 2 -%}
+          <div class="mosaic__column">
+            {{ block_1 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_2 }}
+          </div>
+
+        {%- when 3 -%}
+          <div class="mosaic__column">
+            {{ block_1 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_2 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_3 }}
+          </div>
+
+        {%- when 4 -%}
+          <div class="mosaic__column">
+            {{ block_1 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_2 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_3 }}
+            {{ block_4 }}
+          </div>
+
+        {%- when 5 -%}
+          <div class="mosaic__column">
+            {{ block_1 }}
+            {{ block_2 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_3 }}
+          </div>
+
+          <div class="mosaic__column">
+            {{ block_4 }}
+            {{ block_5 }}
+          </div>
+      {%- endcase -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Mosaic",
+  "max_blocks": 5,
+  "settings": [
+    {
+      "type": "select",
+      "id": "section_size",
+      "label": "Section height",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "800 x 520px .jpg recommended for standard images. 1100 x 1100px .jpg recommended for center images."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_overlay",
+          "label": "Show overlay",
+          "info": "Increase text readability on busy images.",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background",
+          "default": "#f3f4f4"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#4f5558"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your heading"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Text",
+          "default": "Tell more about your product, collection..."
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            {
+              "value": "top_left",
+              "label": "Top left"
+            },
+            {
+              "value": "top_center",
+              "label": "Top center"
+            },
+            {
+              "value": "top_right",
+              "label": "Top right"
+            },
+            {
+              "value": "middle_left",
+              "label": "Middle left"
+            },
+            {
+              "value": "middle_center",
+              "label": "Middle center"
+            },
+            {
+              "value": "middle_right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom_left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom_center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "bottom_right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "top_left"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "color",
+          "id": "button_background",
+          "label": "Background",
+          "default": "#4f5558"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Text",
+          "default": "#f3f4f4"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default": "Learn more"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Image",
+      "name": "Mosaic",
+      "blocks": [
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        },
+        {
+          "type": "item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

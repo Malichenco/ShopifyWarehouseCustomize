@@ -1,0 +1,535 @@
+<article data-section-id="{{ section.id }}" data-section-type="blog">
+  <div class="container">
+    {%- if blog.articles_count > 0 -%}
+      <header class="page__header">
+        <h1 class="page__title heading h1">{{ blog.title }}</h1>
+
+        {%- if section.settings.show_tags and blog.all_tags.size > 0 -%}
+          <ul class="page__tag-list hidden-pocket" role="list">
+            <li class="page__tag-item link {% if current_tags == blank %}is-selected{% endif %}">
+              <a href="{{ blog.url }}">{{ 'blog.general.all_tag' | t }}</a>
+            </li>
+
+            {%- for tag in blog.all_tags -%}
+              <li class="page__tag-item link {% if current_tags contains tag %}is-selected{% endif %}">{{ tag | link_to_tag: tag }}</li>
+            {%- endfor -%}
+          </ul>
+
+          <div class="page__action-list hidden-lap-and-up">
+            <div class="value-picker-wrapper">
+              <button class="value-picker-button" aria-haspopup="true" aria-expanded="false" aria-controls="blog-tag-selector" data-action="open-value-picker">
+                {%- if current_tags == blank -%}
+                  {{- 'blog.general.all_tag' | t -}}
+                {%- else -%}
+                  {{- current_tags.first -}}
+                {%- endif -%}
+
+                {%- render 'icon', icon: 'arrow-bottom' -%}
+              </button>
+
+              <div id="blog-tag-selector" class="value-picker" aria-hidden="true">
+                {% render 'icon', icon: 'nav-triangle-borderless' %}
+
+                <div class="value-picker__inner">
+                  <header class="value-picker__header">
+                    <span class="value-picker__title text--strong">{{ 'blog.general.categories' | t }}</span>
+                    <button class="value-picker__close" data-action="close-value-picker" aria-controls="blog-tag-selector" aria-label="{{ 'general.accessibility.close' | t }}">{% render 'icon', icon: 'close' %}</button>
+                  </header>
+
+                  <div class="value-picker__choice-list">
+                    <a href="/blogs/{{ blog.handle }}" class="value-picker__choice-item {% if current_tags == blank %}is-selected{% endif %}">{{ 'blog.general.all_tag' | t }} {% render 'icon', icon: 'check-2' %}</a>
+
+                    {%- for tag in blog.all_tags -%}
+                      <a href="/blogs/{{ blog.handle }}/tagged/{{ tag | handle }}" class="value-picker__choice-item {% if current_tags contains tag %}is-selected{% endif %}">{{ tag }} {% render 'icon', icon: 'check-2' %}</a>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div class="blog-container">
+      {%- if blog.articles_count == 0 -%}
+        <div class="empty-state">
+          <p class="empty-state__heading heading h1">{{ blog.title }}</p>
+          <p class="empty-state__description">{{ 'blog.general.empty' | t }}</p>
+
+          <div class="empty-state__button-container">
+            <a href="{{ routes.root_url }}" class="empty-state__button button button--primary">{{ 'blog.general.empty_button' | t }}</a>
+          </div>
+        </div>
+      {%- else -%}
+        {%- assign articles_per_page = section.settings.articles_per_page -%}
+        {%- assign modulo = articles_per_page | modulo: 2 -%}
+
+        {%- if section.settings.highlight_first_article and modulo == 0 and current_tags == blank -%}
+          {%- assign articles_per_page = articles_per_page | plus: 1 -%}
+        {%- endif -%}
+
+        <div class="blog-post-list-wrapper">
+          {%- paginate blog.articles by articles_per_page -%}
+            <div class="blog-post-list block-list block-list--loose block-list--no-flush">
+              {%- for article in blog.articles -%}
+                {%- if section.settings.highlight_first_article and current_tags == blank and forloop.first -%}
+                  <div class="block-list__item 1/1 hidden-pocket hidden-lap">
+                    {%- render 'article-item', article: article, featured: true -%}
+                  </div>
+                {%- endif -%}
+
+                <div class="block-list__item 1/1 1/2--tablet 1/2--desk {% if section.settings.highlight_first_article and current_tags == blank and forloop.first %}hidden-desk{% endif %}">
+                  {%- render 'article-item', article: article, featured: false -%}
+                </div>
+              {%- endfor -%}
+            </div>
+
+            {%- render 'pagination', paginate: paginate -%}
+          {%- endpaginate -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 and blog.articles_count > 0 -%}
+        <div class="blog-sidebar hidden-tablet">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'newsletter' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--newsletter" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  <style>
+                    #block-{{ block.id }} {
+                      background: {{ block.settings.background }};
+                      color: {{ block.settings.text }};
+                    }
+                  </style>
+
+                  {%- if block.settings.title != blank -%}
+                    <h2 class="heading h3">{{ block.settings.title | escape }}</h2>
+                  {%- endif -%}
+
+                  {%- if block.settings.content != blank -%}
+                    <div class="rte">
+                      {{ block.settings.content }}
+                    </div>
+                  {%- endif -%}
+
+                  {%- assign newsletter_id = 'newsletter-' | append: block.id -%}
+
+                  <div class="newsletter newsletter--compact">
+                    {%- form 'customer', id: newsletter_id, class: 'form newsletter__form' -%}
+                      {%- if form.posted_successfully? -%}
+                        <p class="alert alert--success">{{ 'home_page.newsletter.success' | t }}</p>
+                      {%- else -%}
+                        {%- if form.errors -%}
+                          <p class="alert alert--error">{{ form.errors.messages['email'] }}</p>
+                        {%- endif -%}
+
+                        <input type="hidden" name="contact[tags]" value="newsletter">
+
+                        <div class="form__input-wrapper form__input-wrapper--labelled">
+                          <input type="email" name="contact[email]" class="form__field form__field--text form__field--borderless" aria-label="{{ 'home_page.newsletter.input' | t }}" required>
+                          <label for="newsletter[contact][email]" class="form__floating-label">{{ 'home_page.newsletter.input' | t }}</label>
+                        </div>
+
+                        <button type="submit" class="form__submit form__submit--tight button button--primary button--full">{{ 'home_page.newsletter.submit' | t }}</button>
+                      {%- endif -%}
+                    {%- endform -%}
+
+                    {%- if block.settings.subtext != blank -%}
+                      <p class="newsletter__text">{{ block.settings.subtext | escape }}</p>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              {%- when 'featured_posts' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--posts" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  <ol class="blog-sidebar__post-list {% if block.settings.show_ranking %}blog-sidebar__post-list--ranked{% endif %}" role="list">
+                    {%- assign show_placeholder = true -%}
+
+                    {%- for i in (1..5) -%}
+                      {%- assign article_option = 'article_' | append: i -%}
+                      {%- assign article = block.settings[article_option] -%}
+
+                      {%- unless article == blank -%}
+                        <li class="blog-sidebar__post-item">
+                          {%- if article.image -%}
+                            <a href="{{ article.url }}" class="blog-sidebar__post-image-wrapper">
+                              <div class="blog-sidebar__post-image-overflow">
+                                <img loading="lazy" src="{{ article.image | img_url: '100x80', crop: 'center', scale: 2 }}" alt="{{ article.image.alt | escape }}" class="blog-sidebar__post-image">
+                              </div>
+                            </a>
+                          {%- endif -%}
+
+                          <div class="blog-sidebar__post-info">
+                            <a class="blog-sidebar__post-title text--strong link" href="{{ article.url }}">{{ article.title }}</a>
+
+                            {%- if block.settings.show_date or block.settings.show_category and article.tags.size > 0 -%}
+                              <div class="blog-sidebar__post-meta">
+                                {%- if block.settings.show_category and article.tags.size > 0 -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ article.tags.first }}</span>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_date -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ article.published_at | date: format: 'short_month_day_year' }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+                          </div>
+                        </li>
+
+                        {%- assign show_placeholder = false -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+
+                    {%- if show_placeholder -%}
+                      {%- for i in (1..3) -%}
+                        <li class="blog-sidebar__post-item">
+                          {%- if article.image -%}
+                            <a href="#" class="blog-sidebar__post-image-wrapper">
+                              <div class="blog-sidebar__post-image-overflow">
+                                {%- capture placeholder -%}{% cycle 'lifestyle-1', 'lifestyle-2' %}{%- endcapture -%}
+                                {{ placeholder | placeholder_svg_tag: 'blog-sidebar__post-placeholder placeholder-svg' }}
+                              </div>
+                            </a>
+                          {%- endif -%}
+
+                          <div class="blog-sidebar__post-info">
+                            <a class="blog-sidebar__post-title text--strong" href="#">{{ 'home_page.onboarding.article_title' | t }}</a>
+
+                            {%- if block.settings.show_date or block.settings.show_category -%}
+                              <div class="blog-sidebar__post-meta">
+                                {%- if block.settings.show_category -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ 'home_page.onboarding.article_category' | t }}</span>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_date -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ 'now' | date: format: 'short_month_day_year' }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+                          </div>
+                        </li>
+                      {%- endfor -%}
+                    {%- endif -%}
+                  </ol>
+                </div>
+
+              {%- when 'rich_text' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--text" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  {%- if block.settings.content != blank -%}
+                    <div class="rte text--pull">
+                      {{ block.settings.content }}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'featured_products' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--products" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  <div class="product-list product-list--horizontal">
+                    {%- assign show_placeholder = true -%}
+
+                    {%- for i in (1..3) -%}
+                      {%- assign product_option = 'product_' | append: i -%}
+                      {%- assign product = block.settings[product_option] -%}
+
+                      {%- unless product == blank -%}
+                        {%- render 'product-item', product: product, horizontal: true, hide_labels: true -%}
+                        {%- assign show_placeholder = false -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+
+                    {%- if show_placeholder -%}
+                      {%- for i in (1..2) -%}
+                        {%- render 'product-item-placeholder', horizontal: true, hide_labels: true -%}
+                      {%- endfor -%}
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              {%- when 'links' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--menu" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- assign menu = linklists[block.settings.menu] -%}
+
+                  {%- unless menu.empty? -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ menu.title }}</p>
+
+                    <ul class="blog-sidebar__linklist" role="list">
+                      {%- for link in menu.links -%}
+                        <li class="blog-sidebar__link-item">
+                          <a href="{{ link.url }}" class="text--strong link">{{ link.title }}</a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endunless -%}
+                </div>
+
+              {%- when 'social_media' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--social" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  {%- capture social_media -%}{% render 'social-media', show_social_media_name: false %}{%- endcapture -%}
+
+                  {%- if social_media != blank -%}
+                    <div class="blog-sidebar__social-list">
+                      {{ social_media }}
+                    </div>
+                  {%- endif -%}
+                </div>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Blog post",
+  "blocks": [
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Customers who subscribe will have their email address added to the \"accepts marketing\" [customer list](/admin/customers?query=&accepts_marketing=1)."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Join Us"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>A short sentence describing what someone will receive by subscribing</p>"
+        },
+        {
+          "type": "text",
+          "id": "subtext",
+          "label": "Sub-text",
+          "default": "100% free, Unsubscribe any time!"
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background",
+          "default": "#1e2d7d"
+        },
+        {
+          "type": "color",
+          "id": "text",
+          "label": "Text",
+          "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "social_media",
+      "name": "Social media",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Make sure to have properly configured your social media in the theme settings."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Follow us"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rss",
+          "label": "Show RSS",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "featured_posts",
+      "name": "Blog posts",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Popular posts"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_ranking",
+          "label": "Show ranking",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_category",
+          "label": "Show category",
+          "info": "The first article's tag will be shown as category.",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_date",
+          "label": "Show date",
+          "default": true
+        },
+        {
+          "type": "article",
+          "id": "article_1",
+          "label": "Blog post 1"
+        },
+        {
+          "type": "article",
+          "id": "article_2",
+          "label": "Blog post 2"
+        },
+        {
+          "type": "article",
+          "id": "article_3",
+          "label": "Blog post 3"
+        },
+        {
+          "type": "article",
+          "id": "article_4",
+          "label": "Blog post 4"
+        },
+        {
+          "type": "article",
+          "id": "article_5",
+          "label": "Blog post 5"
+        }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Rich text",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your text"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>You can use this text to write about your brand.</p>"
+        }
+      ]
+    },
+    {
+      "type": "featured_products",
+      "name": "Featured products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Featured products"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        }
+      ]
+    },
+    {
+      "type": "links",
+      "name": "Links",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "This menu won't show dropdown items."
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "min": 4,
+      "max": 30,
+      "step": 1,
+      "label": "Posts per page",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "highlight_first_article",
+      "label": "Highlight first article",
+      "info": "Only on large screens.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_category",
+      "label": "Show category",
+      "info": "The first article's tag will be shown as category.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpt",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,230 @@
+{%- assign mega_menus = section.blocks | map: 'settings' | map: 'menu_item' -%}
+
+<div id="mobile-menu" class="mobile-menu" aria-hidden="true">
+  {%- render 'icon', icon: 'nav-triangle-borderless' -%}
+
+  <div class="mobile-menu__inner">
+    <div class="mobile-menu__panel">
+      <div class="mobile-menu__section">
+        <ul class="mobile-menu__nav" data-type="menu" role="list">
+          {%- for link in menu.links -%}
+            <li class="mobile-menu__nav-item">
+              {%- if link.links != blank -%}
+                {%- capture panel_id -%}mobile-panel-{{ forloop.index0 }}{%- endcapture -%}
+
+                <button class="mobile-menu__nav-link" data-type="menuitem" aria-haspopup="true" aria-expanded="false" aria-controls="{{ panel_id }}" data-action="open-panel">
+                  {{- link.title -}} {%- render 'icon', icon: 'arrow-right' -%}
+                </button>
+              {%- else -%}
+                <a href="{{ link.url }}" class="mobile-menu__nav-link" data-type="menuitem">{{ link.title }}</a>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      {%- if section.settings.navigation_phone_number != blank or section.settings.navigation_email != blank -%}
+        <div class="mobile-menu__section mobile-menu__section--loose">
+          <p class="mobile-menu__section-title heading h5">{{ 'header.navigation.need_help' | t }}</p>
+
+          {%- if section.settings.navigation_phone_number != blank -%}
+            <div class="mobile-menu__help-wrapper">
+              {%- render 'icon', icon: 'bi-phone' -%}
+              <span>{{ section.settings.navigation_phone_number | escape }}</span>
+            </div>
+          {%- endif -%}
+
+          {%- if section.settings.navigation_email != blank -%}
+            <div class="mobile-menu__help-wrapper">
+              {%- render 'icon', icon: 'bi-email' -%}
+              <a href="mailto:{{ section.settings.navigation_email }}">{{ section.settings.navigation_email | escape }}</a>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- capture social_media -%}{% render 'social-media', show_social_media_name: true %}{%- endcapture -%}
+
+      {%- if section.settings.show_navigation_social_media and social_media != blank -%}
+        <div class="mobile-menu__section mobile-menu__section--loose">
+          <p class="mobile-menu__section-title heading h5">{{ 'header.navigation.follow_us' | t }}</p>
+
+          {{- social_media -}}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}We now need to loop again (for the second level) to create the nested panel{%- endcomment -%}
+
+    {%- for link in menu.links -%}
+      {%- if link.links != blank -%}
+        {%- capture panel_id -%}mobile-panel-{{ forloop.index0 }}{%- endcapture -%}
+
+        <div id="{{ panel_id }}" class="mobile-menu__panel is-nested">
+          <div class="mobile-menu__section is-sticky">
+            <button class="mobile-menu__back-button" data-action="close-panel">{% render 'icon', icon: 'arrow-left' %} {{ 'header.navigation.back' | t }}</button>
+          </div>
+
+          <div class="mobile-menu__section">
+            {%- assign is_mega_menu = false -%}
+            {%- assign downcase_title = link.title | downcase | strip -%}
+
+            {%- for mega_menu in mega_menus -%}
+              {%- assign mega_menu_setting_downcase = mega_menu | downcase | strip -%}
+
+              {%- if mega_menu_setting_downcase == downcase_title -%}
+                {%- assign is_mega_menu = true -%}
+                {%- break -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- if is_mega_menu -%}
+              <div class="mobile-menu__nav-list">
+                {%- for sub_link in link.links -%}
+                  {%- capture mobile_list_id -%}mobile-list-{% increment mobile_list %}{%- endcapture -%}
+
+                  <div class="mobile-menu__nav-list-item">
+                    {%- if sub_link.levels == 0 -%}
+                      <a href="{{ sub_link.url }}" class="mobile-menu__nav-list-toggle text--strong">{{ sub_link.title }}</a>
+                    {%- else -%}
+                      <button class="mobile-menu__nav-list-toggle text--strong" aria-controls="{{ mobile_list_id }}" aria-expanded="false" data-action="toggle-collapsible" data-close-siblings="false">
+                        {{- sub_link.title -}} {% render 'icon', icon: 'arrow-bottom' %}
+                      </button>
+
+                      <div id="{{ mobile_list_id }}" class="mobile-menu__nav-collapsible">
+                        <div class="mobile-menu__nav-collapsible-content">
+                          <ul class="mobile-menu__nav" data-type="menu" role="list">
+                            {%- for sub_sub_link in sub_link.links -%}
+                              <li class="mobile-menu__nav-item">
+                                <a href="{{ sub_sub_link.url }}" class="mobile-menu__nav-link" data-type="menuitem">{{ sub_sub_link.title }}</a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        </div>
+                      </div>
+                    {%- endif -%}
+                  </div>
+                {%- endfor -%}
+              </div>
+
+              {%- assign mega_menu_block = nil -%}
+
+              {%- for block in section.blocks -%}
+                {%- assign downcase_block_menu_item = block.settings.menu_item | downcase | strip -%}
+
+                {%- if downcase_block_menu_item == downcase_title -%}
+                  {%- assign mega_menu_block = block -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- assign promo_count = 0 -%}
+
+              {%- capture promo_blocks -%}
+                {%- if mega_menu_block.settings.image_1 != blank -%}
+                  {% assign promo_count = promo_count | plus: 1 %}
+
+                  <div class="mobile-menu__promo-item">
+                    <a href="{{ mega_menu_block.settings.image_1_link | default: '#' }}" class="mobile-menu__promo">
+                      <div class="mobile-menu__image-wrapper">
+                        {{- mega_menu_block.settings.image_1 | image_url: width: mega_menu_block.settings.image_1.width | image_tag: loading: 'lazy', sizes: '300px', widths: '300,600,900' -}}
+                      </div>
+
+                      <span class="mobile-menu__image-heading heading">{{ mega_menu_block.settings.image_1_heading | escape }}</span>
+                      <p class="mobile-menu__image-text">{{ mega_menu_block.settings.image_1_text | escape }}</p>
+                    </a>
+                  </div>
+                {%- endif -%}
+
+                {%- if mega_menu_block.settings.image_2 != blank -%}
+                  {% assign promo_count = promo_count | plus: 1 %}
+
+                  <div class="mobile-menu__promo-item">
+                    <a href="{{ mega_menu_block.settings.image_2_link | default: '#' }}" class="mobile-menu__promo">
+                      <div class="mobile-menu__image-wrapper">
+                        {{- mega_menu_block.settings.image_2 | image_url: width: mega_menu_block.settings.image_2.width | image_tag: loading: 'lazy', sizes: '300px', widths: '300,600,900' -}}
+                      </div>
+
+                      <span class="mobile-menu__image-heading heading">{{ mega_menu_block.settings.image_2_heading | escape }}</span>
+                      <p class="mobile-menu__image-text">{{ mega_menu_block.settings.image_2_text | escape }}</p>
+                    </a>
+                  </div>
+                {%- endif -%}
+              {%- endcapture -%}
+
+              {%- if promo_blocks != blank -%}
+                {%- if promo_count == 1 -%}
+                  {{- promo_blocks -}}
+                {%- else -%}
+                  <div class="scroller">
+                    <div class="scroller__inner">
+                      <div class="mobile-menu__promo-list">
+                        {{- promo_blocks -}}
+                      </div>
+                    </div>
+                  </div>
+                {%- endif -%}
+              {%- endif -%}
+            {%- else -%}
+              <ul class="mobile-menu__nav" data-type="menu" role="list">
+                <li class="mobile-menu__nav-item">
+                  <a href="{{ link.url }}" class="mobile-menu__nav-link text--strong">{{ link.title }}</a>
+                </li>
+
+                {%- for sub_link in link.links -%}
+                  <li class="mobile-menu__nav-item">
+                    {%- if sub_link.links != blank -%}
+                      {%- capture panel_id -%}mobile-panel-{{ forloop.parentloop.index0 }}-{{ forloop.index0 }}{%- endcapture -%}
+
+                      <button class="mobile-menu__nav-link" data-type="menuitem" aria-haspopup="true" aria-expanded="false" aria-controls="{{ panel_id }}" data-action="open-panel">
+                        {{- sub_link.title -}} {%- render 'icon', icon: 'arrow-right' -%}
+                      </button>
+                    {%- else -%}
+                      <a href="{{ sub_link.url }}" class="mobile-menu__nav-link" data-type="menuitem">{{ sub_link.title }}</a>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%}Finally we need to do the same to create the third level menus{%- endcomment -%}
+
+    {%- for link in menu.links -%}
+      {%- if link.links != blank -%}
+        {%- assign downcase_title = link.title | downcase -%}
+
+        {%- unless mega_menus contains downcase_title -%}
+          {%- for sub_link in link.links -%}
+            {%- if sub_link.links != blank -%}
+              {%- capture panel_id -%}mobile-panel-{{ forloop.parentloop.index0 }}-{{ forloop.index0 }}{%- endcapture -%}
+
+              <div id="{{ panel_id }}" class="mobile-menu__panel is-nested">
+                <div class="mobile-menu__section is-sticky">
+                  <button class="mobile-menu__back-button" data-action="close-panel">{% render 'icon', icon: 'arrow-left' %} {{ 'header.navigation.back' | t }}</button>
+                </div>
+
+                <div class="mobile-menu__section">
+                  <ul class="mobile-menu__nav" data-type="menu" role="list">
+                    <li class="mobile-menu__nav-item">
+                      <a href="{{ sub_link.url }}" class="mobile-menu__nav-link text--strong">{{ sub_link.title }}</a>
+                    </li>
+
+                    {%- for sub_sub_link in sub_link.links -%}
+                      <li class="mobile-menu__nav-item">
+                        <a href="{{ sub_sub_link.url }}" class="mobile-menu__nav-link" data-type="menuitem">{{ sub_sub_link.title }}</a>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        {%- endunless -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>

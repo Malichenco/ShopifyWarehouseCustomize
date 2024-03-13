@@ -1,0 +1,325 @@
+{%- assign is_entirely_fulfilled = false -%}
+{%- assign has_one_fulfillment = false -%}
+
+{%- if order.fulfillment_status == 'fulfilled' -%}
+  {%- assign has_one_fulfillment = true -%}
+  {%- assign is_entirely_fulfilled = true -%}
+  {%- assign tracking_numbers = '' -%}
+
+  {%- assign number_of_fulfillable_items = 0 -%}
+
+  {%- for line_item in order.line_items -%}
+    {%- assign number_of_fulfillable_items = number_of_fulfillable_items | plus: line_item.quantity -%}
+  {%- endfor -%}
+
+  {%- for line_item in order.line_items -%}
+    {%- assign tracking_numbers = tracking_numbers | append: line_item.fulfillment.tracking_number | append: ',' -%}
+
+    {%- if line_item.fulfillment.item_count != number_of_fulfillable_items -%}
+      {%- assign has_one_fulfillment = false -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- assign tracking_numbers = tracking_numbers | split: ',' | compact | uniq -%}
+{%- endif -%}
+
+<section data-section-id="{{ section.id }}" data-section-type="account">
+  <div class="container container--flush">
+    <div class="page__sub-header">
+      <nav aria-label="{{ 'general.breadcrumb.title' | t }}" class="breadcrumb">
+        <ol class="breadcrumb__list" role="list">
+          <li class="breadcrumb__item">
+            <a class="breadcrumb__link link" href="{{ routes.root_url }}">{{ 'general.breadcrumb.home' | t }}</a> {%- render 'icon', icon: 'arrow-right' -%}
+          </li>
+
+          <li class="breadcrumb__item">
+            <a class="breadcrumb__link link" href="{{ routes.account_url }}">{{ 'general.breadcrumb.account' | t }}</a> {%- render 'icon', icon: 'arrow-right' -%}
+          </li>
+
+          <li class="breadcrumb__item">
+            <a class="breadcrumb__link link" href="{{ routes.account_url }}">{{ 'customer.general.orders' | t }}</a> {%- render 'icon', icon: 'arrow-right' -%}
+          </li>
+
+          <li class="breadcrumb__item">
+            <span class="breadcrumb__link" aria-current="page">{{ 'customer.order.order_number' | t: order_number: order.name }}</span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="layout">
+      <div class="layout__section layout__section--secondary">
+        <div class="card card--sticky hidden-pocket">
+          <div class="card__section card__section--tight">
+            <div class="card__linklist">
+              <a href="{{ routes.account_url }}" class="card__linklist-item link text--strong">{{ 'customer.general.orders' | t }}</a>
+              <a href="{{ routes.account_addresses_url }}" class="card__linklist-item link">{{ 'customer.general.addresses' | t }}</a>
+              <a href="{{ routes.account_logout_url }}" class="card__linklist-item link" data-no-instant>{{ 'customer.general.logout' | t }}</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="value-picker-wrapper hidden-tablet-and-up">
+          <button class="value-picker-button value-picker-button--pill" aria-haspopup="true" aria-expanded="false" aria-controls="account-selector" data-action="open-value-picker">
+            {{- 'customer.general.orders' | t -}} {%- render 'icon', icon: 'arrow-bottom' -%}
+          </button>
+
+          <div id="account-selector" class="value-picker" aria-hidden="true">
+            <div class="value-picker__inner">
+              <header class="value-picker__header">
+                <span class="value-picker__title text--strong">{{ 'customer.general.my_account' | t }}</span>
+                <button class="value-picker__close" data-action="close-value-picker" aria-controls="account-selector" aria-label="{{ 'general.accessibility.close' | t }}">{% render 'icon', icon: 'close' %}</button>
+              </header>
+
+              <div class="value-picker__choice-list">
+                <a href="{{ routes.account_url }}" class="value-picker__choice-item is-selected">{{ 'customer.general.orders' | t }} {% render 'icon', icon: 'check-2' %}</a>
+                <a href="{{ routes.account_addresses_url }}" class="value-picker__choice-item">{{ 'customer.general.addresses' | t }} {% render 'icon', icon: 'check-2' %}</a>
+                <a href="{{ routes.account_logout_url }}" class="value-picker__choice-item" data-no-instant>{{ 'customer.general.logout' | t }} {% render 'icon', icon: 'check-2' %}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout__section">
+        <div class="order-summary card">
+          <div class="card__header card__header--tight">
+            <div class="card__navigation">
+              <a href="{{ routes.account_url }}" class="card__navigation-breadcrumb link">{% render 'icon', icon: 'arrow-left' %} {{ 'customer.order.back_to_orders' | t }}</a>
+              <p class="hidden-phone">{{ order.created_at | date: format: 'month_day_year_time' }}</p>
+            </div>
+
+            <h1 class="card__title heading h1">{{ 'customer.order.order_number' | t: order_number: order.name }}</h1>
+
+            <p class="hidden-tablet-and-up">{{ order.created_at | date: format: 'month_day_year_time' }}</p>
+
+            {%- if order.cancelled -%}
+              {%- capture cancellation_date -%}{{ order.cancelled_at | date: format: 'month_day_year_time' }}{%- endcapture -%}
+
+              <div class="order-summary__alert">
+                <p class="alert alert--large alert--error">{{ 'customer.order.cancelled_at' | t: date: cancellation_date, reason: order.cancel_reason_label }}</p>
+              </div>
+            {%- elsif is_entirely_fulfilled and has_one_fulfillment -%}
+              {%- assign fulfillment = '' -%}
+
+              {%- for line_item in order.line_items -%}
+                {%- if line_item.fulfillment -%}
+                  {%- assign fulfillment = line_item.fulfillment -%}
+                  {%- break -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              <div class="order-summary__alert">
+                {%- if fulfillment.tracking_url != blank and fulfillment.tracking_number != blank -%}
+                  <p class="alert alert--large alert--success">{{ 'customer.order.fulfillment_with_url_and_number_html' | t: tracking_url: fulfillment.tracking_url, tracking_number: fulfillment.tracking_number }}</p>
+                {%- elsif fullfillment.tracking_url != blank -%}
+                  <p class="alert alert--large alert--success">{{ 'customer.order.fulfillment_with_url_html' | t: tracking_url: fulfillment.tracking_url }}</p>
+                {%- elsif fullfilment.tracking_number != blank -%}
+                  <p class="alert alert--large alert--success">{{ 'customer.order.fulfillment_with_number_html' | t: tracking_number: fulfillment.tracking_number }}</p>
+                {%- else -%}
+                  <p class="alert alert--large alert--success">{{ 'customer.order.fulfillment_html' | t }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="table-wrapper">
+            <table class="table table--loose">
+              <thead>
+                <tr>
+                  <th>{{ 'customer.order.product' | t }}</th>
+                  <th class="table__cell--center">{{ 'customer.order.quantity' | t }}</th>
+                  <th class="table__cell--right">{{ 'customer.order.total' | t }}</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {%- for line_item in order.line_items -%}
+                  <tr class="line-item">
+                    <td class="line-item__product-info">
+                      <div class="line-item__product-info-wrapper">
+                        <div class="line-item__image-wrapper">
+                          <div class="aspect-ratio aspect-ratio--square">
+                            <img loading="lazy" src="{{ line_item.image | img_url: '90x90', scale: 2 }}" alt="{{ line_item.image.alt | escape }}">
+                          </div>
+                        </div>
+
+                        <div class="line-item__meta">
+                          <a href="{{ line_item.url }}" class="line-item__title link text--strong">{{ line_item.title }}</a>
+
+                          {%- if line_item.selling_plan_allocation -%}
+                            <p class="line-item__plan-allocation">{{ line_item.selling_plan_allocation.selling_plan.name }}</p>
+                          {%- endif -%}
+
+                          {%- unless line_item.properties == blank -%}
+                            <ul class="line-item__property-list" role="list">
+                              {%- for property in line_item.properties -%}
+                                {%- assign first_character_in_key = property.first | truncate: 1, '' -%}
+
+                                {%- if property.last == blank or first_character_in_key == '_' -%}
+                                  {%- continue -%}
+                                {%- endif -%}
+
+                                <li class="line-item__property">{{ property.first }}: {{ property.last }}</li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endunless -%}
+
+                          <div class="line-item__price-list">
+                            {%- if line_item.original_line_price != line_item.final_line_price -%}
+                              <span class="line-item__price line-item__price--highlight">{{ line_item.final_line_price | money }}</span>
+                              <span class="line-item__price line-item__price--compare">{{ line_item.original_line_price | money }}</span>
+                            {%- else -%}
+                              <span class="line-item__price">{{ line_item.final_line_price | money }}</span>
+                            {%- endif -%}
+                          </div>
+
+                          {%- if line_item.unit_price_measurement -%}
+                            <div class="line-item__price-info">
+                              <div class="unit-price-measurement">
+                                <span class="unit-price-measurement__price">{{ line_item.unit_price | money }}</span>
+                                <span class="unit-price-measurement__separator">/ </span>
+
+                                {%- if line_item.unit_price_measurement.reference_value != 1 -%}
+                                  <span class="unit-price-measurement__reference-value">{{ line_item.unit_price_measurement.reference_value }}</span>
+                                {%- endif -%}
+
+                                <span class="unit-price-measurement__reference-unit">{{ line_item.unit_price_measurement.reference_unit }}</span>
+                              </div>
+                            </div>
+                          {%- endif -%}
+
+                          {%- if line_item.line_level_discount_allocations != blank -%}
+                            <ul class="line-item__discount-list" role="list">
+                              {%- for discount_allocation in line_item.line_level_discount_allocations -%}
+                                <li class="line-item__discount">
+                                  {%- render 'icon', icon: 'sale' -%}{{ discount_allocation.discount_application.title }} (-{{ discount_allocation.amount | money }})
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                          {%- endif -%}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td class="line-item__quantity table__cell--center">{{ line_item.quantity }}</td>
+
+                    <td class="line-item__line-price table__cell--right">{{ line_item.final_line_price | money }}</td>
+                  </tr>
+
+                  {%- unless is_entirely_fulfilled and has_one_fulfillment -%}
+                    {%- if line_item.fulfillment -%}
+                      <tr class="fulfillment-item">
+                        <td colspan="3">
+                          {%- if line_item.fulfillment.tracking_url != blank and line_item.fulfillment.tracking_number != blank -%}
+                            <p class="alert alert--large alert--success">{{ 'customer.order.line_fulfillment_with_url_and_number_html' | t: tracking_url: line_item.fulfillment.tracking_url, tracking_number: line_item.fulfillment.tracking_number }}</p>
+                          {%- elsif fullfillment.tracking_url != blank -%}
+                            <p class="alert alert--large alert--success">{{ 'customer.order.line_fulfillment_with_url_html' | t: tracking_url: line_item.fulfillment.tracking_url }}</p>
+                          {%- elsif fullfilment.tracking_number != blank -%}
+                            <p class="alert alert--large alert--success">{{ 'customer.order.line_fulfillment_with_number_html' | t: tracking_number: line_item.fulfillment.tracking_number }}</p>
+                          {%- else -%}
+                            <p class="alert alert--large alert--success">{{ 'customer.order.line_fulfillment_html' | t }}</p>
+                          {%- endif -%}
+                        </td>
+                      </tr>
+                    {%- endif -%}
+                  {%- endunless -%}
+                {%- endfor -%}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="order-foot">
+            <div class="order-foot__inner">
+              <div class="order-foot__item order-foot__item">
+                <span class="order-foot__item-category">{{ 'customer.order.subtotal' | t }}</span>
+                <span class="order-foot__item-value">{{ order.line_items_subtotal_price | money }}</span>
+              </div>
+
+              {%- for discount_application in order.cart_level_discount_applications -%}
+                <div class="order-foot__item order-foot__item--highlight">
+                  <span class="order-foot__item-category">{{ 'customer.order.discount' | t }} ({{ discount_application.title }})</span>
+                  <span class="order-foot__item-value">-{{ discount_application.total_allocated_amount | money }}</span>
+                </div>
+              {%- endfor -%}
+
+              {%- for shipping_method in order.shipping_methods -%}
+                <div class="order-foot__item order-foot__item">
+                  <span class="order-foot__item-category">{{ 'customer.order.shipping' | t }} ({{ shipping_method.title }})</span>
+                  <span class="order-foot__item-value">{{ shipping_method.price | money }}</span>
+                </div>
+              {%- endfor -%}
+
+              {%- for tax_line in order.tax_lines -%}
+                <div class="order-foot__item order-foot__item">
+                  {%- if cart.taxes_included -%}
+                    <span class="order-foot__item-category">{{ 'customer.order.tax_included' | t }} ({{ tax_line.title }} {{ tax_line.rate_percentage }}%)</span>
+                  {%- else -%}
+                    <span class="order-foot__item-category">{{ 'customer.order.tax_excluded' | t }} ({{ tax_line.title }} {{ tax_line.rate_percentage }}%)</span>
+                  {%- endif -%}
+
+                  <span class="order-foot__item-value">{{ tax_line.price | money }}</span>
+                </div>
+              {%- endfor -%}
+
+              {%- if order.total_duties > 0 -%}
+                <div class="order-foot__item order-foot__item">
+                  <span class="order-foot__item-category">{{ 'customer.order.total_duties' | t }}</span>
+                  <span class="order-foot__item-value">{{ order.total_duties | money }}</span>
+                </div>
+              {%- endif -%}
+
+              {%- if order.total_refunded_amount > 0 -%}
+                <div class="order-foot__item order-foot__item">
+                  <span class="order-foot__item-category">{{ 'customer.order.refunded_amount' | t }}</span>
+                  <span class="order-foot__item-value">{{ order.total_refunded_amount | money }}</span>
+                </div>
+              {%- endif -%}
+
+              <div class="order-foot__item order-foot__item--strong">
+                <span class="order-foot__item-category">{{ 'customer.order.total' | t }}</span>
+                <span class="order-foot__item-value">{{ order.total_net_amount | money }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="grid__cell 1/2--tablet-and-up">
+            <div class="card">
+              <div class="card__section">
+                <p class="heading h6">{{ 'customer.order.billing_address' | t }}</p>
+
+                {%- if order.billing_address -%}
+                  {{- order.billing_address | format_address -}}
+                {%- else -%}
+                  <p>{{ 'customer.order.no_billing_address' | t }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid__cell 1/2--tablet-and-up">
+            <div class="card">
+              <div class="card__section">
+                <p class="heading h6">{{ 'customer.order.shipping_address' | t }}</p>
+
+                {%- if order.shipping_address -%}
+                  {{- order.shipping_address | format_address -}}
+                {%- else -%}
+                  <p>{{ 'customer.order.no_shipping_address' | t }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Order"
+}
+{% endschema %}

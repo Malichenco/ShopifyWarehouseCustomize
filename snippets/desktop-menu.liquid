@@ -1,0 +1,91 @@
+{%- comment -%}
+IMPLEMENTATION NOTE ABOUT MEGA MENUS: in Warehouse, on desktop, we have two different menu styles: one style where the first level is always
+visible, and a second style where the menu is displayed after hitting the "Menu" button.
+
+The mega menu logic is as a consequence quite difference: in the first style, the mega-menu is actually part of the second dropdown menu (as each level
+is displayed as a dropdown). However on the second style, the mega-menu is checked on the first level, as the first menu (which holds the mega-menu) is
+always visible.
+{%- endcomment -%}
+
+{%- assign mega_menus = section.blocks | map: 'settings' | map: 'menu_item' -%}
+
+{%- if section.settings.desktop_navigation_layout == 'condensed' -%}
+  {%- assign is_floating = true -%}
+{%- else -%}
+  {%- assign is_floating = false -%}
+{%- endif -%}
+
+{%- assign is_mega_menu = false -%}
+{%- assign downcase_title = menu.title | downcase | strip -%}
+
+{%- for mega_menu in mega_menus -%}
+  {%- assign mega_menu_setting_downcase = mega_menu | downcase | strip -%}
+
+  {%- if mega_menu_setting_downcase == downcase_title -%}
+    {%- assign is_mega_menu = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+
+{%- if is_floating == false and is_mega_menu -%}
+  {%- render 'mega-menu', is_floating: is_floating, mega_menu: menu, index: index -%}
+{%- else -%}
+  <ul id="{{ index }}" class="nav-dropdown {% if is_floating %}nav-dropdown--floating {% if mega_menus.size > 0 %}nav-dropdown--fixed {% endif %}{% elsif menu.levels == 1 %}nav-dropdown--restrict{% endif %}" data-type="menu" aria-hidden="true" role="list">
+    {%- if is_floating -%}
+      {%- render 'icon', icon: 'nav-triangle-borderless' -%}
+    {%- endif -%}
+
+    {%- for link in menu.links -%}
+      {%- assign is_mega_menu = false -%}
+      {%- assign downcase_title = link.title | downcase | strip -%}
+
+      {%- for mega_menu in mega_menus -%}
+        {%- assign mega_menu_setting_downcase = mega_menu | downcase | strip -%}
+
+        {%- if mega_menu_setting_downcase == downcase_title -%}
+          {%- assign is_mega_menu = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      <li class="nav-dropdown__item {% if is_mega_menu %}has-mega-menu{% endif %}">
+        {%- if link.links.size == 0 -%}
+          <a href="{{ link.url }}" class="nav-dropdown__link link" data-type="menuitem">{{ link.title }}</a>
+        {%- else -%}
+          {%- capture index_nested -%}{{ index }}-{% increment nav_dropdown %}{%- endcapture -%}
+          <a href="{{ link.url }}" class="nav-dropdown__link link" data-type="menuitem" aria-expanded="false" aria-controls="{{ index_nested }}" aria-haspopup="true">{{- link.title -}} {%- render 'icon', icon: 'arrow-right' -%}</a>
+
+          {%- if is_mega_menu -%}
+            {%- render 'mega-menu', is_floating: is_floating, mega_menu: link, index: index_nested -%}
+          {%- else -%}
+            <ul id="{{ index_nested }}" class="nav-dropdown {% if is_floating %}nav-dropdown--floating{% endif %}" data-type="menu" aria-hidden="true" role="list">
+              {%- render 'icon', icon: 'nav-triangle-left' -%}
+
+              {%- for sub_link in link.links -%}
+                <li class="nav-dropdown__item">
+                  {%- if sub_link.links.size == 0 -%}
+                    <a href="{{ sub_link.url }}" class="nav-dropdown__link link" data-type="menuitem">{{ sub_link.title }}</a>
+                  {%- else -%}
+                    {%- capture index_nested_nested -%}{{ index_nested }}-{% increment nav_dropdown_nested %}{%- endcapture -%}
+
+                    <a href="{{ sub_link.url }}" class="nav-dropdown__link link" data-type="menuitem" aria-expanded="false" aria-controls="{{ index_nested_nested }}" aria-haspopup="true">{{- sub_link.title -}} {%- render 'icon', icon: 'arrow-right' -%}</a>
+
+                    <ul id="{{ index_nested_nested }}" class="nav-dropdown {% if is_floating %}nav-dropdown--floating{% endif %}" data-type="menu" aria-hidden="true" role="list">
+                      {%- render 'icon', icon: 'nav-triangle-left' -%}
+
+                      {%- for sub_sub_link in sub_link.links -%}
+                        <li class="nav-dropdown__item">
+                          <a href="{{ sub_sub_link.url }}" class="nav-dropdown__link link" data-type="menuitem">{{ sub_sub_link.title }}</a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

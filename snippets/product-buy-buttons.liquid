@@ -1,0 +1,59 @@
+<div class="product-form__buy-buttons" {{ block.shopify_attributes }}>
+  {%- if product.gift_card? and block.settings.show_gift_card_recipient -%}
+    <gift-card-recipient class="gift-card-recipient">
+      <div class="form__input-wrapper form__input-wrapper--labelled">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" class="checkbox" name="properties[__shopify_send_gift_card_to_recipient]" id="product-{{ section.id }}-{{ product.id }}-send-gift-card-to-recipient">
+          {% render 'icon', icon: 'check' %}
+        </div>
+
+        <label for="product-{{ section.id }}-{{ product.id }}-send-gift-card-to-recipient">{{ 'gift_card.recipient.checkbox' | t }}</label>
+      </div>
+
+      <div class="gift-card-recipient__fields js:hidden">
+        <div class="form__input-wrapper form__input-wrapper--labelled">
+          <input id="product-{{ section.id }}-{{ product.id }}-recipient-email" type="email" class="form__field form__field--text" name="properties[Recipient email]" required value="{{ form.email }}">
+          <label for="product-{{ section.id }}-{{ product.id }}-recipient-email" class="form__floating-label">{{ 'gift_card.recipient.email_label' | t }}</label>
+        </div>
+
+        <div class="form__input-wrapper form__input-wrapper--labelled">
+          <input id="product-{{ section.id }}-{{ product.id }}-recipient-name" type="text" class="form__field form__field--text" name="properties[Recipient name]" value="{{ form.name }}">
+          <label for="product-{{ section.id }}-{{ product.id }}-recipient-name" class="form__floating-label">{{ 'gift_card.recipient.name_label' | t }}</label>
+        </div>
+
+        <div class="form__input-wrapper form__input-wrapper--labelled">
+          <textarea id="product-{{ section.id }}-{{ product.id }}-recipient-message" rows="4" class="form__field form__field--textarea" name="properties[Recipient message]">{{ form.message }}</textarea>
+          <label for="product-{{ section.id }}-{{ product.id }}-recipient-message" class="form__floating-label">{{ 'gift_card.recipient.message_label' | t }}</label>
+        </div>
+      </div>
+    </gift-card-recipient>
+  {%- endif -%}
+
+  <div class="product-form__payment-container">
+    {%- if product.template_suffix != 'contact' -%}
+      {%- if product.selected_or_first_available_variant.available -%}
+        {%- if product.template_suffix == 'pre-order' -%}
+          <button type="submit" class="product-form__add-button button button--primary" data-action="add-to-cart">{{ 'product.form.pre_order' | t }}</button>
+        {%- else -%}
+          <button type="submit" class="product-form__add-button button button--primary" data-action="add-to-cart">{{ 'product.form.add_to_cart' | t }}</button>
+        {%- endif -%}
+      {%- else -%}
+        <button type="submit" class="product-form__add-button button button--disabled" disabled>{{ 'product.form.sold_out' | t }}</button>
+      {%- endif -%}
+
+      {%- if block.settings.show_payment_button and product.template_suffix != 'pre-order' -%}
+        {{ form | payment_button }}
+      {%- endif -%}
+    {%- else -%}
+      <a href="mailto:{{ shop.email }}" class="button button--primary">{{ 'product.form.contact_us' | t }}</a>
+    {%- endif -%}
+
+    {%- if block.settings.show_payment_button and product.selected_or_first_available_variant.available == false -%}
+      <style>
+        #shopify-section-{{ section.id }} .shopify-payment-button {
+          display: none;
+        }
+      </style>
+    {%- endif -%}
+  </div>
+</div>

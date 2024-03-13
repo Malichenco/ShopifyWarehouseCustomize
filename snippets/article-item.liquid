@@ -1,0 +1,48 @@
+<div class="article-item {% if featured %}article-item--featured{% endif %}">
+  {%- if article.image -%}
+    <a href="{{ article.url }}" class="article-item__image-container">
+      {%- capture sizes_attribute -%}(max-width: 699px) 100vw, {% if featured %}980px{% else %}475px{% endif %}{%- endcapture -%}
+      {{- article.image | image_url: width: article.image.width | image_tag: loading: 'lazy', sizes: sizes_attribute, widths: '200,300,400,500,600,700,800,900,1000,1200,1400,1600,1800,2000', class: 'article-item__image' -}}
+    </a>
+  {%- endif -%}
+
+  {%- if request.page_type == 'index' -%}
+    <h3 class="article-item__title heading h4">
+      <a href="{{ article.url }}" class="link">{{ article.title }}</a>
+    </h3>
+  {%- else -%}
+    <h2 class="article-item__title heading {% if featured %}h1{% else %}h3{% endif %}">
+      <a href="{{ article.url }}" class="link">{{ article.title }}</a>
+    </h2>
+  {%- endif -%}
+
+  {%- capture article_meta -%}
+    {%- if section.settings.show_category and article.tags.size > 0 -%}
+      <span class="article-item__meta-item">{{ article.tags.first }}</span>
+    {%- endif -%}
+
+    {%- if section.settings.show_author -%}
+      <span class="article-item__meta-item">{{ 'blog.article.written_by' | t: author: article.author }}</span>
+    {%- endif -%}
+
+    {%- if section.settings.show_date -%}
+      <time class="article-item__meta-item">{{ article.published_at | date: format: 'short_month_day_year' }}</time>
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- if article_meta != blank -%}
+    <div class="article-item__meta">
+      {{ article_meta }}
+    </div>
+  {%- endif -%}
+
+  {%- if section.settings.show_excerpt -%}
+    <div class="article-item__excerpt rte">
+      {%- if article.excerpt != blank -%}
+        {{- article.excerpt -}}
+      {%- else -%}
+        {{- article.content | strip_html | truncate: 150 -}}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+</div>

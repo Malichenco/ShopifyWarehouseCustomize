@@ -1,0 +1,49 @@
+{%- comment -%}
+  On the dedicated search results, we show products differently from blog posts/pages. As a consequence, this cause all
+  kind of issues when doing the pagination. To circumvent this issue, when we enter into the search results, we only show
+  products, and we do another Ajax request to load the products and blog posts only.
+{%- endcomment -%}
+
+<section data-section-id="{{ section.id }}">
+  {%- assign filtered_terms = search.terms -%}
+
+  {%- if filtered_terms contains ' AND ' -%}
+    {%- assign filtered_terms = filtered_terms | split: ' AND ' | last -%}
+  {%- endif -%}
+
+  {%- if search.results_count > 0 -%}
+    <div class="link-search-results">
+      <div class="card">
+        <header class="card__section card__section--tight">
+          {%- if search.types contains 'page' and search.types contains 'article' -%}
+            <h1 class="card__title heading h1">{{ 'search.general.pages_and_articles_with_terms' | t: terms: filtered_terms }}</h1>
+          {%- elsif search.types contains 'page' -%}
+            <h1 class="card__title heading h1">{{ 'search.general.pages_with_terms' | t: terms: filtered_terms }}</h1>
+          {%- else -%}
+            <h1 class="card__title heading h1">{{ 'search.general.articles_with_terms' | t: terms: filtered_terms }}</h1>
+          {%- endif -%}
+        </header>
+
+        <div class="card__section card__section--no-padding">
+          <ul class="link-search-results__list" role="list">
+            {%- for result in search.results limit: 20 -%}
+              {%- if result.object_type == 'product' -%}
+                {%- continue -%}
+              {%- endif -%}
+
+              <li class="link-search-results__list-item">
+                <a href="{{ result.url }}" class="link-search-results__link">{{ result.title }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    </div>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Search content"
+}
+{% endschema %}

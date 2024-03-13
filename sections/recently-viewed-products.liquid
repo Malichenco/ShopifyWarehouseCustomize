@@ -1,0 +1,103 @@
+{%- capture section_settings -%}
+{
+  "currentProductId": {{ product.id | json }}
+}
+{%- endcapture -%}
+
+<section class="section" data-section-id="{{ section.id }}" data-section-type="recently-viewed-products" data-section-settings='{{ section_settings }}'>
+  <div class="container">
+    {%- if section.settings.title != blank -%}
+      <header class="section__header">
+        <h2 class="section__title heading h3">{{ section.settings.title | escape }}</h2>
+      </header>
+    {%- endif -%}
+
+    <div class="recently-viewed-products-placeholder">
+      {%- if request.page_type == 'search' -%}
+        <div class="scroller">
+          <div class="scroller__inner">
+            <div class="product-list product-list--vertical product-list--scrollable">
+              {%- comment -%}
+              NOTE: we are doing an inner for loop to preserve the order (from most recently seen to oldest one), as search.results, out of the box,
+                    will order by title, which is not really desirable. As the number of recently viewed products is kept small, I think the inner loop
+                    should not cause too much performance issue (and is likely faster than fetching using all_products)
+              {%- endcomment -%}
+
+              {%- assign parsed_terms = search.terms | split: ' OR ' -%}
+
+              {%- for parsed_term in parsed_terms -%}
+                {%- assign id = parsed_term | split: 'id:' | last | times: 1 -%}
+
+                {%- for product in search.results -%}
+                  {%- if product.id == id -%}
+                    {%- render 'product-item', product: product, grid_classes: '1/4--lap 1/5--desk 1/6--wide', show_add_to_cart: section.settings.show_quick_buy -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- if request.page_type != 'search' or search.results_count == 0 -%}
+    <style>
+      /* By default the section is hidden as we do not know if there are product yet */
+      #shopify-section-{{ section.id }} {
+        display: none;
+      }
+    </style>
+  {%- endif -%}
+
+  {%- comment -%}
+  --------------------------------------------------------------------------------------
+  QUICK VIEW CONTAINER
+  --------------------------------------------------------------------------------------
+  {%- endcomment -%}
+
+  <div id="modal-quick-view-{{ section.id }}" class="modal" aria-hidden="true">
+    <div class="modal__dialog modal__dialog--stretch" role="dialog">
+      <button class="modal__close link" data-action="close-modal" title="{{ 'general.accessibility.close' | t | escape }}">
+        {%- render 'icon', icon: 'close' -%}
+      </button>
+
+      <div class="modal__loader">
+        {%- render 'icon', icon: 'search-loader' -%}
+      </div>
+
+      <div class="modal__inner"></div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Recently viewed products",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Only be visible if at least one product has been viewed."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Recently viewed"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quick_buy",
+      "label": "Show quick buy",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "category": "Product",
+      "name": "Recently viewed products"
+    }
+  ]
+}
+{% endschema %}

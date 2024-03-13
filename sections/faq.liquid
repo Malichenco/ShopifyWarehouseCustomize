@@ -1,0 +1,529 @@
+<div class="container container--flush container--narrow">
+  <div class="faq" itemscope itemtype="https://schema.org/FAQPage">
+    <div class="faq__group-list">
+      {%- for block in section.blocks -%}
+        {%- if forloop.first or block.type == 'separator' -%}
+          <div class="faq__group">
+        {%- endif -%}
+
+        {%- case block.type -%}
+          {%- when 'separator' -%}
+            <h1 class="faq__group-title heading h2" {{ block.shopify_attributes }}>
+              <span class="anchor" id="block-{{ block.id }}"></span>
+              {{- block.settings.title | escape -}}
+            </h1>
+          {%- when 'question' -%}
+            <div class="faq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" {{ block.shopify_attributes }}>
+              <div class="faq__item-wrapper">
+                <button class="faq__question heading h4" data-action="toggle-collapsible" aria-expanded="false" aria-controls="block-{{ block.id }}" itemprop="name">{{ block.settings.title | escape }} <span class="plus-button plus-button--large"></span></button>
+
+                <div id="block-{{ block.id }}" class="faq__answer-wrapper" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                  <div class="faq__answer rte" itemprop="text">
+                    {{ block.settings.answer }}
+                  </div>
+                </div>
+              </div>
+            </div>
+        {%- endcase -%}
+
+        {%- if forloop.last or block.type == 'question' and section.blocks[forloop.index].type == 'separator' -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.show_contact_info -%}
+      <div class="container--unflush">
+        <div class="faq__contact-info">
+          <header class="page__header page__header--stack page__header--centered">
+            {%- if section.settings.contact_info_heading != blank -%}
+              <h2 class="page__title heading h2">{{ section.settings.contact_info_heading | escape }}</h2>
+            {%- endif -%}
+
+            {%- if section.settings.contact_info_text != blank -%}
+              <div class="page__description rte">
+                {{ section.settings.contact_info_text }}
+              </div>
+            {%- endif -%}
+          </header>
+
+          <div class="text-with-icons text-with-icons--boxed">
+            {%- if section.settings.contact_1_heading != blank or section.settings.contact_1_text != blank -%}
+              <div class="text-with-icons__item">
+                <div class="text-with-icons__icon-wrapper">
+                  {%- render 'icon', icon: section.settings.contact_1_icon, stroke_width: 1.5 -%}
+                </div>
+
+                <div class="text-with-icons__content-wrapper">
+                  {%- if section.settings.contact_1_heading != blank -%}
+                    <p class="text-with-icons__title text--strong">{{ section.settings.contact_1_heading | escape }}</p>
+                  {%- endif -%}
+
+                  {%- if section.settings.contact_1_text != blank -%}
+                    <div class="text-with-icons__content rte">
+                      {{ section.settings.contact_1_text }}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.contact_2_heading != blank or section.settings.contact_2_text != blank -%}
+              <div class="text-with-icons__item">
+                <div class="text-with-icons__icon-wrapper">
+                  {%- render 'icon', icon: section.settings.contact_2_icon, stroke_width: 1.5 -%}
+                </div>
+
+                <div class="text-with-icons__content-wrapper">
+                  {%- if section.settings.contact_2_heading != blank -%}
+                    <p class="text-with-icons__title text--strong">{{ section.settings.contact_2_heading | escape }}</p>
+                  {%- endif -%}
+
+                  {%- if section.settings.contact_2_text != blank -%}
+                    <div class="text-with-icons__content rte">
+                      {{ section.settings.contact_2_text }}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_contact_info",
+      "label": "Show additional info",
+      "info": "Additional info is displayed below all questions.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contact_info_heading",
+      "label": "Heading",
+      "default": "Any question?"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_info_text",
+      "label": "Text",
+      "default": "<p>If we still haven't answered your question, you can contact us below and we will get back to you as soon as possible.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Block 1"
+    },
+    {
+      "type": "select",
+      "id": "contact_1_icon",
+      "label": "Icon",
+      "options": [
+        {
+          "value": "bi-add-to-cart",
+          "label": "Add to cart",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-gift-wrap",
+          "label": "Gift wrap",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-gift-box",
+          "label": "Gift box",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-heart",
+          "label": "Heart",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-ecology",
+          "label": "Ecology",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-plant",
+          "label": "Plant",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-shop",
+          "label": "Shop",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-shop-pin",
+          "label": "Shop with pin",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-alert",
+          "label": "Alert",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-chat",
+          "label": "Chat",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-comment",
+          "label": "Comment",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-customer-support",
+          "label": "Customer support",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-email",
+          "label": "Email",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-network",
+          "label": "Network",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-newsletter",
+          "label": "Newsletter",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-love",
+          "label": "Love",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-phone",
+          "label": "Phone",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-share",
+          "label": "Share",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-delivery",
+          "label": "Delivery",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-fast-delivery",
+          "label": "Fast delivery",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-returns",
+          "label": "Returns",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-time",
+          "label": "Time",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-secure-payment",
+          "label": "Secure payment",
+          "group": "Security"
+        },
+        {
+          "value": "bi-mobile-payment",
+          "label": "Mobile payment",
+          "group": "Security"
+        },
+        {
+          "value": "bi-credit-card",
+          "label": "Credit card",
+          "group": "Security"
+        },
+        {
+          "value": "bi-shield",
+          "label": "Shield",
+          "group": "Security"
+        }
+      ],
+      "default": "bi-phone"
+    },
+    {
+      "type": "text",
+      "id": "contact_1_heading",
+      "label": "Heading",
+      "default": "Customer support"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_1_text",
+      "label": "Text",
+      "default": "<p>Enter your text here</p>"
+    },
+    {
+      "type": "header",
+      "content": "Block 2"
+    },
+    {
+      "type": "select",
+      "id": "contact_2_icon",
+      "label": "Icon",
+      "options": [
+        {
+          "value": "bi-add-to-cart",
+          "label": "Add to cart",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-gift-wrap",
+          "label": "Gift wrap",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-gift-box",
+          "label": "Gift box",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-heart",
+          "label": "Heart",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-ecology",
+          "label": "Ecology",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-plant",
+          "label": "Plant",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-shop",
+          "label": "Shop",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-shop-pin",
+          "label": "Shop with pin",
+          "group": "Shop"
+        },
+        {
+          "value": "bi-alert",
+          "label": "Alert",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-chat",
+          "label": "Chat",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-comment",
+          "label": "Comment",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-customer-support",
+          "label": "Customer support",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-email",
+          "label": "Email",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-network",
+          "label": "Network",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-newsletter",
+          "label": "Newsletter",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-love",
+          "label": "Love",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-phone",
+          "label": "Phone",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-share",
+          "label": "Share",
+          "group": "Communication"
+        },
+        {
+          "value": "bi-delivery",
+          "label": "Delivery",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-fast-delivery",
+          "label": "Fast delivery",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-returns",
+          "label": "Returns",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-time",
+          "label": "Time",
+          "group": "Delivery"
+        },
+        {
+          "value": "bi-secure-payment",
+          "label": "Secure payment",
+          "group": "Security"
+        },
+        {
+          "value": "bi-mobile-payment",
+          "label": "Mobile payment",
+          "group": "Security"
+        },
+        {
+          "value": "bi-credit-card",
+          "label": "Credit card",
+          "group": "Security"
+        },
+        {
+          "value": "bi-shield",
+          "label": "Shield",
+          "group": "Security"
+        }
+      ],
+      "default": "bi-email"
+    },
+    {
+      "type": "text",
+      "id": "contact_2_heading",
+      "label": "Heading",
+      "default": "Send a message"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_2_text",
+      "label": "Text",
+      "default": "<p>Enter your text here</p>"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "separator",
+      "name": "Section separator",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Default"
+        }
+      ]
+    },
+    {
+      "type": "question",
+      "name": "Question",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Question"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Answer"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Text",
+      "name": "Frequently Asked Questions",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "separator",
+          "settings": {
+            "title": "Shipping"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "Do you ship overseas?",
+            "answer": "<p>Yes, we ship all over the world. Shipping costs will apply, and will be added at checkout. We run discounts and promotions all year, so stay tuned for exclusive deals.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "How long will it take to get my order?",
+            "answer": "<p>It depends on where you are. Orders processed here will take 5-7 business days to arrive. Overseas deliveries can take anywhere from 7-16 days. Delivery details will be provided in your confirmation email.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "What shipping carriers do you use?",
+            "answer": "<p>We use all major carriers, and local courier partners. You’ll be asked to select a delivery method during checkout.</p>"
+          }
+        },
+        {
+          "type": "separator",
+          "settings": {
+            "title": "Product"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "Can I return my product?",
+            "answer": "<p>We always aim for make sure our customers love our products, but if you do need to return an order, we’re happy to help. Just email us directly and we’ll take you through the process.</p>"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "Can I get my product personalized?",
+            "answer": "<p>It depends on the creator and the product. All options are outlined on the product page, so look out for customization options there.</p>"
+          }
+        },
+        {
+          "type": "separator",
+          "settings": {
+            "title": "Other"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "title": "Any question?",
+            "answer": "<p>You can contact us through our contact page! We will be happy to assist you.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

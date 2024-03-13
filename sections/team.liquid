@@ -1,0 +1,211 @@
+<div class="container">
+  <div class="team">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'separator' and forloop.first != true -%}
+        </div>
+      {%- endif -%}
+
+      {%- case block.type -%}
+        {%- when 'separator' -%}
+          <h2 class="team__section-title heading h3" {{ block.shopify_attributes }}>{{ block.settings.title | escape }}</h2>
+
+        {%- when 'member' -%}
+          <div class="team__block-item team__member" {{ block.shopify_attributes }}>
+            {%- if block.settings.image -%}
+              <img loading="lazy" src="{{ block.settings.image | img_url: '250x250', crop: 'center' }}" alt="{{ block.settings.image.alt | escape }}" class="team__member-pic {% if section.settings.round_image %}team__member-pic--rounded{% endif %}">
+            {%- endif -%}
+
+            {%- if block.settings.title != blank -%}
+              <p class="team__member-title heading h4">{{ block.settings.title | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.subheading != blank -%}
+              <p class="team__member-subheading">{{ block.settings.subheading | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.link != blank and block.settings.link_title != blank -%}
+              <a href="{{ block.settings.link }}" class="team__member-link link link--accented">{{ block.settings.link_title }}</a>
+            {%- endif -%}
+          </div>
+
+        {%- when 'promotion' -%}
+          <div id="block-{{ block.id }}" class="team__block-item team__promotion" {{ block.shopify_attributes }}>
+            <style>
+              #block-{{ block.id }} {
+                background: {{ block.settings.background }};
+                color: {{ block.settings.text }};
+              }
+            </style>
+
+            {%- if block.settings.title != blank -%}
+              <h2 class="heading h4">{{ block.settings.title | escape }}</h2>
+            {%- endif -%}
+
+            {%- if block.settings.content != blank -%}
+              <div class="rte">
+                {{ block.settings.content }}
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.button_text != blank -%}
+              <a href="{{ block.settings.button_link }}" class="button button--primary button--small">{{ block.settings.button_text | escape }}</a>
+            {%- endif -%}
+          </div>
+      {%- endcase -%}
+
+      {%- comment -%}If current block is a separator and is not the last one, we open a new div{%- endcomment -%}
+
+      {%- if block.type == 'separator' and forloop.last == false -%}
+        <div class="team__block-list">
+      {%- endif -%}
+
+      {%- comment -%}If current block is last one and is not a separator, we close the div{%- endcomment -%}
+
+      {%- if forloop.last and block.type != 'separator' -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{%- if section.settings.image -%}
+  <style>
+    .page__header--image,
+    .page__header--image :is(.heading, .rte h1, .rte h2, .rte h3, .rte h4, .rte h5, .rte h6) {
+      color: {{ section.settings.color }};
+    }
+  </style>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Team",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "round_image",
+      "label": "Round profile images",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "separator",
+      "name": "Section separator",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Section title"
+        }
+      ]
+    },
+    {
+      "type": "member",
+      "name": "Member",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "400 x 400px .jpg recommended"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Name"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Role"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "text",
+          "id": "link_title",
+          "label": "Link title",
+          "default": "Your link"
+        }
+      ]
+    },
+    {
+      "type": "promotion",
+      "name": "Promotion",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Join our team"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>A short sentence describing your job offer</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text"
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background",
+          "default": "#1e2d7d"
+        },
+        {
+          "type": "color",
+          "id": "text",
+          "label": "Text",
+          "default": "#ffffff"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      {
+        "type": "separator",
+        "settings": {
+          "title": "Our team"
+        }
+      },
+      {
+        "type": "member",
+        "settings": {
+          "title": "John D.",
+          "subheading": "CEO",
+          "link": "mailto:john@test.com"
+        }
+      },
+      {
+        "type": "member",
+        "settings": {
+          "title": "Emily H.",
+          "subheading": "CTO",
+          "link": "mailto:emily@test.com"
+        }
+      },
+      {
+        "type": "promotion",
+        "settings": {}
+      }
+    ]
+  }
+}
+{% endschema %}

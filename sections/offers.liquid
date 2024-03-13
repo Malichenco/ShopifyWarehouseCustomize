@@ -1,0 +1,105 @@
+<section class="section" data-section-id="{{ section.id }}" data-section-type="offers">
+  <div class="container">
+    {%- capture block_list -%}
+      <div class="block-list">
+        {%- for block in section.blocks -%}
+          <div class="block-list__item 1/{{ section.settings.items_per_row }}--lap-and-up" {{ block.shopify_attributes }}>
+            <div class="offer-item {% if section.settings.items_per_row < 4 %}offer-item--inline{% endif %}">
+              {%- if block.settings.image -%}
+                <div class="offer-item__image-wrapper">
+                  {{- block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: 'lazy', sizes: '250px', widths: '250,500,750' -}}
+                </div>
+              {%- endif -%}
+
+              <div class="offer-item__inner">
+                {%- if block.settings.title != blank -%}
+                  <p class="offer-item__title heading h4">{{ block.settings.title | escape }}</p>
+                {%- endif -%}
+
+                {%- if block.settings.content != blank -%}
+                  <div class="offer-item__content rte">
+                    {{ block.settings.content }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endcapture -%}
+
+    {%- if section.settings.stack_mobile -%}
+      {{ block_list }}
+    {%- else -%}
+      <div class="scroller">
+        <div class="scroller__inner">
+          {{ block_list }}
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Offers",
+  "settings": [
+    {
+      "type": "range",
+      "id": "items_per_row",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "label": "Items per row on desktop",
+      "default": 2
+    },
+    {
+      "type": "checkbox",
+      "id": "stack_mobile",
+      "label": "Stack on mobile",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "offer",
+      "name": "Offer",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "250 x 250px .jpg recommended"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your text"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>Write a few words about your offers or your shop.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Text",
+      "name": "Offers",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "offer"
+        },
+        {
+          "type": "offer"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

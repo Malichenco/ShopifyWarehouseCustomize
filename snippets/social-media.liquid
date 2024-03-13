@@ -1,0 +1,137 @@
+{%- assign social_media_count = 0 -%}
+
+{%- capture social_media -%}
+  {%- if settings.social_facebook != blank -%}
+    <li class="social-media__item social-media__item--facebook">
+      <a href="{{ settings.social_facebook | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Facebook' }}">
+        {%- render 'icon', icon: 'facebook' -%} {%- if show_social_media_name -%}Facebook{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_twitter != blank -%}
+    <li class="social-media__item social-media__item--twitter">
+      <a href="{{ settings.social_twitter | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Twitter' }}">
+        {%- render 'icon', icon: 'twitter' -%} {%- if show_social_media_name -%}Twitter{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_threads != blank -%}
+    <li class="social-media__item social-media__item--threwds">
+      <a href="{{ settings.social_threads | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Threads' }}">
+        {%- render 'icon', icon: 'threads' -%} {%- if show_social_media_name -%}Threads{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_instagram != blank -%}
+    <li class="social-media__item social-media__item--instagram">
+      <a href="{{ settings.social_instagram | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Instagram' }}">
+        {%- render 'icon', icon: 'instagram' -%} {%- if show_social_media_name -%}Instagram{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_pinterest != blank -%}
+    <li class="social-media__item social-media__item--pinterest">
+      <a href="{{ settings.social_pinterest | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Pinterest' }}">
+        {%- render 'icon', icon: 'pinterest' -%} {%- if show_social_media_name -%}Pinterest{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_youtube != blank -%}
+    <li class="social-media__item social-media__item--youtube">
+      <a href="{{ settings.social_youtube | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'YouTube' }}">
+        {%- render 'icon', icon: 'youtube' -%} {%- if show_social_media_name -%}YouTube{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_tiktok != blank -%}
+    <li class="social-media__item social-media__item--tiktok">
+      <a href="{{ settings.social_tiktok | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'TikTok' }}">
+        {%- render 'icon', icon: 'tiktok' -%} {%- if show_social_media_name -%}TikTok{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_vimeo != blank -%}
+    <li class="social-media__item social-media__item--vimeo">
+      <a href="{{ settings.social_vimeo | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Vimeo' }}">
+        {%- render 'icon', icon: 'vimeo' -%} {%- if show_social_media_name -%}Vimeo{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_linkedin != blank -%}
+    <li class="social-media__item social-media__item--linkedin">
+      <a href="{{ settings.social_linkedin | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'LinkedIn' }}">
+        {%- render 'icon', icon: 'linkedin' -%} {%- if show_social_media_name -%}LinkedIn{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_snapchat != blank -%}
+    <li class="social-media__item social-media__item--snapchat">
+      <a href="{{ settings.social_snapchat | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Snapchat' }}">
+        {%- render 'icon', icon: 'snapchat' -%} {%- if show_social_media_name -%}Snapchat{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_tumblr != blank -%}
+    <li class="social-media__item social-media__item--tumblr">
+      <a href="{{ settings.social_tumblr | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Tumblr' }}">
+        {%- render 'icon', icon: 'tumblr' -%} {%- if show_social_media_name -%}Tumblr{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if settings.social_fancy != blank -%}
+    <li class="social-media__item social-media__item--fancy">
+      <a href="{{ settings.social_fancy | replace_first: 'https://', '' | replace_first: 'http://', '' | prepend: 'https://' }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'Fancy' }}">
+        {%- render 'icon', icon: 'fancy' -%} {%- if show_social_media_name -%}Fancy{%- endif -%}
+      </a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+
+  {%- if block.settings.show_rss and template.name == 'blog' or template.name == 'article' -%}
+    <li class="social-media__item social-media__item--rss">
+      <a href="{{ blog.url }}.atom" target="_blank" rel="noopener" aria-label="{{ 'general.social.follow_label' | t: social_media: 'RSS' }}">{% render 'icon', icon: 'rss' %}</a>
+    </li>
+
+    {% assign social_media_count = social_media_count | plus: 1 %}
+  {%- endif -%}
+{%- endcapture -%}
+
+{%- if social_media_count > 0 -%}
+  <ul class="social-media__item-list {% if show_social_media_name %}social-media__item-list--stack{% endif %} list--unstyled" role="list">
+    {{ social_media }}
+  </ul>
+{%- endif -%}

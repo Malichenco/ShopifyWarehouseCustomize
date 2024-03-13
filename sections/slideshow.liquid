@@ -1,0 +1,316 @@
+{%- capture section_settings -%}
+{
+  "autoPlay": {{ section.settings.autoplay | json }},
+  "prevNextButtons": false,
+  "pageDots": {% if section.blocks.size > 1 %}true{% else %}false{% endif %},
+  "setGallerySize": {% if section.settings.section_size == 'preserve_ratio' %}true{% else %}false{% endif %},
+  "adaptiveHeight": {% if section.settings.section_size == 'preserve_ratio' %}true{% else %}false{% endif %},
+  "transitionEffect": {{ section.settings.carousel_effect | json }},
+  "cycleSpeed": {{ section.settings.cycle_speed | times: 1000 | json }}
+}
+{%- endcapture -%}
+
+<section data-section-id="{{ section.id }}" data-section-type="slideshow" data-section-settings='{{ section_settings }}'>
+  <div {% unless section.settings.edge_to_edge %}class="container container--flush"{% endunless %}>
+    <div class="slideshow slideshow--{{ section.settings.section_size | replace: '_', '-' }} {% if section.settings.edge_to_edge %}slideshow--edge2edge{% endif %}" style="color: {{ section.blocks.first.settings.text_color }}">
+      {%- for block in section.blocks -%}
+        {%- capture slide_inner -%}
+          <div class="slideshow__slide-inner slideshow__slide-inner--{{ block.settings.content_position | replace: '_', '-' }}">
+            {%- unless block.settings.image -%}
+              {%- capture placeholder -%}{% cycle 'lifestyle-1', 'lifestyle-2' %}{%- endcapture -%}
+
+              {%- if section.settings.section_size == 'preserve_ratio' -%}
+                {{- placeholder | placeholder_svg_tag: 'slideshow__image-placeholder' -}}
+              {%- else -%}
+                <div class="slideshow__placeholder">
+                  {{- placeholder | placeholder_svg_tag: 'slideshow__image-placeholder' -}}
+                </div>
+              {%- endif -%}
+            {%- endunless -%}
+
+            {%- if block.settings.image -%}
+              {%- capture class_attribute -%}slideshow__image {% unless section.settings.section_size == 'preserve_ratio' %}image-background{% endunless %}{%- endcapture -%}
+
+              <div class="{% if block.settings.mobile_image %}hidden-phone{% endif %}">
+                {{- block.settings.image | image_url: width: block.settings.image.width | image_tag: loading: 'lazy', widths: '200,300,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400', class: class_attribute -}}
+              </div>
+
+              {%- if block.settings.mobile_image -%}
+                <div class="hidden-tablet-and-up">
+                  {{- block.settings.mobile_image | image_url: width: block.settings.mobile_image.width | image_tag: loading: 'lazy', widths: '200,300,400,600,800,1000,1200,1400,1600,1800,2000,2200,2400', class: class_attribute -}}
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+
+            {%- capture slide_content -%}
+              {%- if block.settings.title != blank -%}
+                <h2 class="slideshow__title heading h1">{{ block.settings.title | escape }}</h2>
+              {%- endif -%}
+
+              {%- if block.settings.content != blank -%}
+                <p class="slideshow__content">{{ block.settings.content | escape | newline_to_br }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.link != blank and block.settings.button_text != blank -%}
+                <a href="{{ block.settings.link }}" class="slideshow__button button">{{ block.settings.button_text | escape }}</a>
+              {%- endif -%}
+            {%- endcapture -%}
+
+            {%- if slide_content != blank -%}
+              <div class="slideshow__content-wrapper">
+                <div class="container">
+                  {{ slide_content }}
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+
+          <style>
+            #block-{{ block.id }} {
+              color: {{ block.settings.text_color }};
+            }
+
+            #block-{{ block.id }} .button {
+              color: {{ block.settings.button_text_color }};
+              background: {{ block.settings.button_background }};
+            }
+
+            #block-{{ block.id }} .button:hover {
+              background: {{ block.settings.button_background | color_modify: 'alpha', 0.8 }};
+            }
+
+            {%- if block.settings.show_overlay -%}
+              #block-{{ block.id }}.slideshow__slide--overlay::before {
+                {%- assign overlay_opacity = block.settings.overlay_opacity | divided_by: 100.0 -%}
+                background: linear-gradient(to bottom, rgba(0, 0, 0, 0), {{ '#000000' | color_modify: 'alpha', overlay_opacity }});
+              }
+            {%- endif -%}
+          </style>
+        {%- endcapture -%}
+
+        {%- if block.settings.link != blank and block.settings.button_text == blank -%}
+          <a href="{{ block.settings.link }}" class="slideshow__slide {% if block.settings.show_overlay %}slideshow__slide--overlay{% endif %} {% if forloop.first %}is-selected{% endif %}" id="block-{{ block.id }}" data-block-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+            {{- slide_inner -}}
+          </a>
+        {%- else -%}
+          <div class="slideshow__slide {% if block.settings.show_overlay %}slideshow__slide--overlay{% endif %} {% if forloop.first %}is-selected{% endif %}" id="block-{{ block.id }}" data-block-index="{{ forloop.index0 }}" {{ block.shopify_attributes }}>
+            {{- slide_inner -}}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Slideshow",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "edge_to_edge",
+      "label": "Full-width",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "section_size",
+      "label": "Image size",
+      "options": [
+        {
+          "value": "preserve_ratio",
+          "label": "Original image ratio"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "preserve_ratio"
+    },
+    {
+      "type": "select",
+      "id": "carousel_effect",
+      "label": "Transition effect",
+      "options": [
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "slide",
+          "label": "Slide"
+        }
+      ],
+      "default": "slide"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Auto rotate between slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cycle_speed",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "unit": "sec",
+      "label": "Change slides every",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info": "2160 x 720px .jpg recommended"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile image",
+          "info": "750 x 1100px .jpg recommended. If none is set, desktop image will be used."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_overlay",
+          "label": "Show overlay",
+          "info": "Increase text readability on busy images.",
+          "default": false
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "unit": "%",
+          "default": 30
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text",
+          "default": "#ffffff"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Slide title"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Content",
+          "default": "Tell your story"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "info": "On mobile, content is always centered.",
+          "options": [
+            {
+              "value": "top_left",
+              "label": "Top left"
+            },
+            {
+              "value": "top_center",
+              "label": "Top center"
+            },
+            {
+              "value": "top_right",
+              "label": "Top right"
+            },
+            {
+              "value": "middle_left",
+              "label": "Middle left"
+            },
+            {
+              "value": "middle_center",
+              "label": "Middle center"
+            },
+            {
+              "value": "middle_right",
+              "label": "Middle right"
+            },
+            {
+              "value": "bottom_left",
+              "label": "Bottom left"
+            },
+            {
+              "value": "bottom_center",
+              "label": "Bottom center"
+            },
+            {
+              "value": "bottom_right",
+              "label": "Bottom right"
+            }
+          ],
+          "default": "middle_center"
+        },
+        {
+          "type": "header",
+          "content": "Button"
+        },
+        {
+          "type": "color",
+          "id": "button_background",
+          "label": "Background",
+          "default": "#ffffff"
+        },
+        {
+          "type": "color",
+          "id": "button_text_color",
+          "label": "Text",
+          "default": "#000000"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Text",
+          "default": "Button"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "If no text is set for button, the whole image becomes clickable."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Image",
+      "name": "Slideshow",
+      "blocks": [
+        {
+          "type": "image"
+        },
+        {
+          "type": "image"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

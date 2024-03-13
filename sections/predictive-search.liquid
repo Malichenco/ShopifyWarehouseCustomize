@@ -1,0 +1,168 @@
+<section class="search-ajax" data-section-id="{{ section.id }}">
+  {%- if predictive_search.performed -%}
+    {%- assign total_count = 0 -%}
+
+    {%- if predictive_search.resources.queries.size > 0 -%}
+      {%- assign total_count = total_count | plus: predictive_search.resources.queries.size -%}
+
+      <p class="search-bar__result-category">{{ 'header.search.suggestions' | t }}</p>
+
+      <ul class="search-bar__result-linklist list--unstyled" role="list">
+        {%- for suggestion in predictive_search.resources.queries -%}
+          <li>
+            <a href="{{ suggestion.url }}" class="search-bar__result-link">{{ suggestion.styled_text }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.products.size > 0 -%}
+      {%- assign total_count = total_count | plus: predictive_search.resources.products.size -%}
+
+      <p class="search-bar__result-category">{{ 'header.search.products' | t }}</p>
+
+      <div class="search-bar__result-products">
+        {%- assign clean_terms = predictive_search.terms | split: ' AND ' | last | remove_first: '*' -%}
+
+        {%- for product in predictive_search.resources.products -%}
+          <a href="{{ product.url }}" class="search-bar__result-item">
+            <div class="search-bar__image-container">
+              <div class="aspect-ratio aspect-ratio--square">
+                <img src="{{ product.featured_image | img_url: '120x120' }}" alt="{{ product.featured_image.alt | escape }}">
+              </div>
+            </div>
+
+            <div class="search-bar__item-info">
+              <p class="search-bar__item-title">{{ product.title | highlight: clean_terms }}</p>
+              <span class="search-bar__item-price">{{ product.price | money }}</span>
+            </div>
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.articles.size > 0 -%}
+      {%- assign total_count = total_count | plus: predictive_search.resources.articles.size -%}
+
+      <p class="search-bar__result-category">{{ 'header.search.blog_posts' | t }}</p>
+
+      <ul class="search-bar__result-linklist list--unstyled" role="list">
+        {%- for article in predictive_search.resources.articles -%}
+          <li>
+            <a href="{{ article.url }}" class="search-bar__result-link">{{ article.title }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.collections.size > 0 -%}
+      {%- assign total_count = total_count | plus: predictive_search.resources.collections.size -%}
+
+      <p class="search-bar__result-category">{{ 'header.search.collections' | t }}</p>
+
+      <ul class="search-bar__result-linklist list--unstyled" role="list">
+        {%- for collection in predictive_search.resources.collections -%}
+          <li>
+            <a href="{{ collection.url }}" class="search-bar__result-link">{{ collection.title }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if predictive_search.resources.pages.size > 0 -%}
+      {%- assign total_count = total_count | plus: predictive_search.resources.pages.size -%}
+
+      <p class="search-bar__result-category">{{ 'header.search.pages' | t }}</p>
+
+      <ul class="search-bar__result-linklist list--unstyled" role="list">
+        {%- for page in predictive_search.resources.pages -%}
+          <li>
+            <a href="{{ page.url }}" class="search-bar__result-link">{{ page.title }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if total_count > 0 -%}
+      <button class="search-bar__view-all" type="submit">
+        {{- 'header.search.view_results' | t -}}
+        {%- render 'icon', icon: 'arrow-right' -%}
+      </button>
+    {%- else -%}
+      <div class="search-bar__empty-state">
+        <p class="heading h4">{{ 'header.search.no_results' | t }}</p>
+      </div>
+    {%- endif -%}
+  {%- elsif search.performed -%}
+    {%- if search.results_count > 0 -%}
+      {%- assign product_results = search.results | where: 'object_type', 'product' -%}
+      {%- assign article_results = search.results | where: 'object_type', 'article' -%}
+      {%- assign page_results = search.results | where: 'object_type', 'page' -%}
+
+      {%- if product_results.size > 0 -%}
+        <p class="search-bar__result-category">{{ 'header.search.products' | t }}</p>
+
+        <div class="search-bar__result-products">
+          {%- assign clean_terms = search.terms | split: ' AND ' | last | remove_first: '*' -%}
+
+          {%- for item in product_results limit: 3 -%}
+            <a href="{{ item.url }}" class="search-bar__result-item">
+              <div class="search-bar__image-container">
+                <div class="aspect-ratio aspect-ratio--square">
+                  <img src="{{ item.featured_image | img_url: '120x120' }}" alt="{{ item.featured_image.alt | escape }}">
+                </div>
+              </div>
+
+              <div class="search-bar__item-info">
+                <p class="search-bar__item-title">{{ item.title | highlight: clean_terms }}</p>
+                <span class="search-bar__item-price">{{ item.price | money }}</span>
+              </div>
+            </a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if article_results.size > 0 or page_results.size > 0 -%}
+        {%- if article_results.size > 0 and page_results.size > 0 -%}
+          <p class="search-bar__result-category">{{ 'header.search.blog_posts_and_pages' | t }}</p>
+        {%- elsif article_results.size > 0 -%}
+          <p class="search-bar__result-category">{{ 'header.search.blog_posts' | t }}</p>
+        {%- elsif page_results.size > 0 -%}
+          <p class="search-bar__result-category">{{ 'header.search.pages' | t }}</p>
+        {%- endif -%}
+
+        <ul class="search-bar__result-linklist list--unstyled" role="list">
+          {%- assign concated_results = article_results | concat: page_results -%}
+
+          {%- for item in concated_results limit: 3 -%}
+            <li>
+              <a href="{{ item.url }}" class="search-bar__result-link">{{ item.title }}</a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- if product_results.size > 3 -%}
+        <button class="search-bar__view-all" type="submit">
+          {%- if settings.search_mode == 'product' -%}
+            {{- 'header.search.view_products' | t -}}
+          {%- else -%}
+            {{- 'header.search.view_results' | t -}}
+          {%- endif -%}
+
+          {%- render 'icon', icon: 'arrow-right' -%}
+        </button>
+      {%- endif -%}
+    {%- else -%}
+      <div class="search-bar__empty-state">
+        <p class="heading h4">{{ 'header.search.no_results' | t }}</p>
+      </div>
+    {%- endif -%}
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Search ajax"
+}
+{% endschema %}

@@ -1,0 +1,156 @@
+{%- capture section_settings -%}
+{
+  "stackable": false,
+  "layout": "vertical"
+}
+{%- endcapture -%}
+
+<section class="section" data-section-id="{{ section.id }}" data-section-type="featured-collection" data-section-settings='{{ section_settings }}'>
+  <div class="container container--flush">
+    {%- assign collection = section.settings.collection -%}
+
+    <div class="featured-collection" {% if section.settings.image %}style="background-image: url({{ section.settings.image | image_url: width: 1000 }})"{% endif %}>
+      <header class="featured-collection__header" {% if section.settings.image %}style="background-image: url({{ section.settings.image | image_url: width: 1000 }})"{% endif %}>
+        {%- if section.settings.title != blank -%}
+          <h2 class="featured-collection__title heading h2">{{ section.settings.title | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.content != blank -%}
+          <p class="featured-collection__text">{{ section.settings.content | escape | newline_to_br }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.button_text != blank -%}
+          <a href="{{ section.settings.button_link | default: collection.url | default: '#' }}" class="featured-collection__cta button button--floating">{{ section.settings.button_text | escape }}</a>
+        {%- endif -%}
+      </header>
+
+      <div class="featured-collection__content">
+        <div class="scroller scroller--flush">
+          <div class="scroller__inner">
+            <div class="product-list product-list--scrollable">
+              {%- assign grid_classes = '1/2--lap 1/3--desk 1/4--wide' -%}
+
+              {%- unless collection == blank -%}
+                {%- for product in collection.products limit: section.settings.products_count -%}
+                  {%- render 'product-item', product: product, grid_classes: grid_classes, show_add_to_cart: section.settings.show_quick_buy -%}
+                {%- endfor -%}
+              {%- else -%}
+                {%- for i in (1..section.settings.products_count) -%}
+                  {%- render 'product-item-placeholder', grid_classes: grid_classes -%}
+                {%- endfor -%}
+              {%- endunless -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  #shopify-section-{{ section.id }} .featured-collection {
+    background-color: {{ section.settings.background }};
+  }
+
+  #shopify-section-{{ section.id }} .featured-collection__header {
+    color: {{ section.settings.text_color }};
+  }
+
+  #shopify-section-{{ section.id }} .featured-collection__header .button {
+    color: {{ section.settings.button_text_color }};
+    background-color: {{ section.settings.button_background }};
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Collection with image",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_count",
+      "label": "Products to show",
+      "min": 4,
+      "max": 48,
+      "step": 4,
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quick_buy",
+      "label": "Show quick buy",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "1000 x 400px .png with transparency recommended (hidden on mobile)"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#0774d7"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured collection"
+    },
+    {
+      "type": "textarea",
+      "id": "content",
+      "label": "Text",
+      "default": "Tell more about your product, collection..."
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#0774d7"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Text",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Link",
+      "info": "If left empty, collection URL is used."
+    }
+  ],
+  "presets": [
+    {
+      "category": "Collection",
+      "name": "Collection with image",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

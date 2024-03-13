@@ -1,0 +1,76 @@
+<style>
+  #shopify-section-{{ section.id }},
+  #shopify-section-{{ section.id }} :is(.heading, .rte h1, .rte h2, .rte h3, .rte h4, .rte h5, .rte h6) {
+    color: {{ section.settings.color }};
+  }
+</style>
+
+<header class="page__header page__header--stack page__header--centered page__header--image {% if section.settings.show_image_overlay %}page__header--overlay{% endif %} {% if section.settings.image_edge_to_edge %}page__header--edge2edge{% endif %}">
+  {%- if section.settings.image != blank -%}
+    {{- section.settings.image | image_url: width: section.settings.width | image_tag: loading: 'lazy', widths: '300,400,500,600,700,800,900,1000,1100,1200,1300,1400,1500,1600,1700,1800,1900,2000', class: 'page__header-image' -}}
+  {%- else -%}
+    {{ 'lifestyle-1' | placeholder_svg_tag: 'page__header-image page__header-image--placeholder' }}
+  {%- endif -%}
+
+  {%- if section.settings.content != blank -%}
+    <div class="page__header-content container--narrow">
+      {%- if section.settings.title != blank -%}
+        <h1 class="page__title heading h1">{{ section.settings.title | escape }}</h1>
+      {%- endif -%}
+
+      <div class="page__description rte">
+        {{ section.settings.content }}
+      </div>
+    </div>
+  {%- endif -%}
+</header>
+
+{% schema %}
+{
+  "name": "Image with text overlay",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Image will be dynamically resized to fit into the box. To prevent image cut, please use Slideshow section instead."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "2000 x 650px .jpg recommended"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Image with text overlay"
+    },
+    {
+      "type": "richtext",
+      "id": "content",
+      "label": "Content",
+      "default": "<p>Use overlay text to give your customers insight into your brand. Select imagery and text that relates to your style and story.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image_overlay",
+      "label": "Show image overlay",
+      "info": "Increase text readability on busy images.",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Text",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "category": "Image",
+      "name": "Image with text overlay",
+      "settings": {}
+    }
+  ]
+}
+{% endschema %}

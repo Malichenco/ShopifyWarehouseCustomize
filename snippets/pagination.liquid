@@ -1,0 +1,29 @@
+{%- if paginate.pages > 1 -%}
+  <div class="pagination">
+    <div class="pagination__inner">
+      {%- if paginate.previous -%}
+        <a class="pagination__prev link" rel="prev" title="{{ 'general.pagination.previous_page' | t }}" data-page="{{ paginate.current_page | minus: 1 }}" href="{{ paginate.previous.url }}{{ hash }}">
+          {%- render 'icon', icon: 'arrow-left' -%} {{- 'general.pagination.previous_page' | t -}}
+        </a>
+      {%- endif -%}
+
+      <div class="pagination__nav">
+        {%- for part in paginate.parts -%}
+          {%- if part.is_link -%}
+            <a href="{{ part.url }}{{ hash }}" data-page="{{ part.title }}" class="pagination__nav-item link" title="{{ 'general.pagination.go_to_page' | t: page: part.title }}">{{ part.title }}</a>
+          {%- else -%}
+            <span class="pagination__nav-item {% if part.title == paginate.current_page %}is-active{% endif %}">{{ part.title }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <span class="pagination__page-count">{{ 'general.pagination.page_count' | t: current_page: paginate.current_page, pages: paginate.pages }}</span>
+
+      {%- if paginate.next -%}
+        <a class="pagination__next link" rel="next" title="{{ 'general.pagination.next_page' | t }}" data-page="{{ paginate.current_page | plus: 1 }}" href="{{ paginate.next.url }}{{ hash }}">
+          {{- 'general.pagination.next_page' | t -}} {%- render 'icon', icon: 'arrow-right' -%}
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}

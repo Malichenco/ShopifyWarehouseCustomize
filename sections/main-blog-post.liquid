@@ -1,0 +1,650 @@
+<article data-section-id="{{ section.id }}" data-section-type="blog-post">
+  <div class="container">
+    <header class="page__header page__header--stack">
+      <h1 class="page__title heading h1">{{ article.title }}</h1>
+
+      {%- capture page_meta -%}
+        {%- if section.settings.show_category and article.tags.size > 0 -%}
+          <span class="page__meta-item page__meta-item--category"><a href="/blogs/{{ blog.handle }}/tagged/{{ article.tags.first | handle }}" class="link">{{ article.tags.first }}</a></span>
+        {%- endif -%}
+
+        {%- if section.settings.show_author -%}
+          <span class="page__meta-item page__meta-item--author">{{ 'blog.article.written_by' | t: author: article.author }}</span>
+        {%- endif -%}
+
+        {%- if section.settings.show_date -%}
+          <time class="page__meta-item page__meta-item--date">{{ article.published_at | date: format: 'short_month_day_year' }}</time>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- if page_meta != blank -%}
+        <div class="page__meta">
+          {{ page_meta }}
+        </div>
+      {%- endif -%}
+    </header>
+
+    <div class="blog-container">
+      <div class="blog-post">
+        {%- if article.image -%}
+          <div class="article__image-wrapper">
+            {{- article.image | image_url: width: article.image.width | image_tag: loading: 'lazy', sizes: 'min(100vw, 980px)', widths: '300,400,500,600,700,800,900,1000,1100,1200' -}}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.show_share_buttons -%}
+          {%- capture share_buttons -%}
+            {%- assign share_url = shop.url | append: article.url -%}
+            {%- assign twitter_text = article.title | url_param_escape -%}
+            {%- assign pinterest_description = article.excerpt_or_content | strip_html | truncatewords: 15 | url_param_escape -%}
+            {%- assign pinterest_image = article.image | img_url: 'large' | prepend: 'https:' -%}
+
+            <ul class="social-media__item-list list--unstyled" role="list">
+              <li class="social-media__item social-media__item--facebook">
+                <a href="https://www.facebook.com/sharer.php?u={{ share_url }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.facebook_share' | t }}">{%- render 'icon', icon: 'facebook' -%}</a>
+              </li>
+
+              <li class="social-media__item social-media__item--pinterest">
+                <a href="https://pinterest.com/pin/create/button/?url={{ share_url }}{% if pinterest_image != blank %}&media={{ pinterest_image }}{% endif %}&description={{ pinterest_description }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.pinterest_pin' | t }}">{%- render 'icon', icon: 'pinterest' -%}</a>
+              </li>
+
+              <li class="social-media__item social-media__item--twitter">
+                <a href="https://twitter.com/share?{% if twitter_text != blank %}text={{twitter_text}}&{% endif %}url={{ share_url }}" target="_blank" rel="noopener" aria-label="{{ 'general.social.twitter_tweet' | t }}">{%- render 'icon', icon: 'twitter' -%}</a>
+              </li>
+
+              <li class="social-media__item">
+                <a href="mailto:?&subject={{ article.title | escape }}&body={{ share_url }}" aria-label="{{ 'general.social.email_share' | t }}">{% render 'icon', icon: 'email' %}</a>
+              </li>
+            </ul>
+          {%- endcapture -%}
+        {%- endif -%}
+
+        {%- if section.settings.show_share_buttons or article.comments_enabled? -%}
+          <div class="card hidden-phone">
+            <div class="card__section card__section--tight">
+              <div class="article__toolbar">
+                {%- if section.settings.show_share_buttons -%}
+                  <div class="article__toolbar-item">
+                    <span class="article__share-label">{{ 'blog.article.share' | t }}</span>
+                    {{- share_buttons -}}
+                  </div>
+                {%- endif -%}
+
+                {%- if article.comments_enabled? -%}
+                  <div class="article__toolbar-item">
+                    {% render 'icon', icon: 'bi-comment' %}
+                    <a href="#comments" class="article__comments-count link">{{ 'blog.article.comments_count' | t: count: article.comments_count }}</a>
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+
+        <div class="article__inner">
+          <div class="article__content rte">
+            {{ article.content }}
+          </div>
+
+          {%- if section.settings.show_share_buttons or section.settings.show_tags and article.tags.size > 0 -%}
+            <div class="article__aside">
+              {%- if section.settings.show_tags and article.tags.size > 0 -%}
+                <div class="article__aside-item">
+                  <span class="article__tag-label">{{ 'blog.article.tags' | t }}&nbsp;</span>
+
+                  {%- for tag in article.tags -%}
+                    <a href="/blogs/{{ blog.handle }}/tagged/{{ tag | handle }}" class="link link--accented {% if settings.underline_links %}link--underline{% endif %}">{{ tag | capitalize }}</a>{%- unless forloop.last -%},&nbsp;{%- endunless -%}
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+
+              {%- if section.settings.show_share_buttons -%}
+                <div class="article__aside-item">
+                  <span class="article__share-label">{{ 'blog.article.share' | t }}</span>
+                  {{ share_buttons }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if blog.previous_article or blog.next_article -%}
+            {%- comment -%}
+              Implementation may look a bit strange here as we're using the "next_article" for the previous button and vice-versa. But we actually found that from
+              a user point of view, it feels "more logical", if you are on the most recent article, to have a button "next article" on the right that goes to the
+              previous article.
+            {%- endcomment -%}
+
+            <div class="article__navigation {% if blog.next_article == nil %}article__navigation--align-right{% endif %}">
+              {%- if blog.next_article -%}
+                <a href="{{ blog.next_article.url }}" class="article__navigation-item article__navigation-item--prev text--strong link" rel="prev">{%- render 'icon', icon: 'arrow-left' -%} {{- 'blog.article.previous_article' | t -}}</a>
+              {%- endif -%}
+
+              {%- if blog.previous_article -%}
+                <a href="{{ blog.previous_article.url }}" class="article__navigation-item article__navigation-item--next text--strong link" rel="next">{{- 'blog.article.next_article' | t -}} {%- render 'icon', icon: 'arrow-right' -%}</a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          {%- if article.comments_enabled? -%}
+            <span id="comments" class="anchor"></span>
+
+            {%- if article.comments_count > 0 -%}
+              <div class="article__comment-list">
+                <p class="article__comment-list-heading heading h2">{{ 'blog.article.comments_count' | t: count: article.comments_count }}</p>
+
+                {%- paginate article.comments by 50 -%}
+                  {%- for comment in article.comments -%}
+                    <div class="article-comment">
+                      {%- if section.settings.show_gravatar -%}
+                        <img class="article-comment__gravatar" src="//www.gravatar.com/avatar/{{ comment.email | md5 }}?s=100" alt="{{ comment.author }}">
+                      {%- endif -%}
+
+                      <div class="article-comment__inner">
+                        <p class="article-comment__author text--strong">{{ comment.author }}</p>
+                        <time class="article-comment__date">{{ comment.created_at | date: format: 'month_day_year_time' }}</time>
+
+                        <div class="article-comment__content rte">
+                          {{- comment.content -}}
+                        </div>
+                      </div>
+                    </div>
+                  {%- endfor -%}
+
+                  {%- render 'pagination', paginate: paginate -%}
+                {%- endpaginate -%}
+              </div>
+            {%- endif -%}
+
+            {%- form 'new_comment', article, class: 'article__comment-form form' -%}
+              <p class="article__comment-form-title heading h2">{{ 'blog.comments.leave_comment' | t }}</p>
+
+              {%- if blog.moderated? -%}
+                <p class="article__moderated-note">{{ 'blog.comments.approval_notice' | t }}</p>
+              {%- endif -%}
+
+              <div class="article__comment-form-wrapper">
+                {%- if form.posted_successfully? -%}
+                  <p class="alert alert--success">
+                    {%- if blog.moderated? -%}
+                      {{- 'blog.comments.success_moderated' | t -}}
+                    {%- else -%}
+                      {{- 'blog.comments.success' | t -}}
+                    {%- endif -%}
+                  </p>
+                {%- else -%}
+                  {%- if form.errors -%}
+                    <div class="alert alert--error">
+                      <ul class="alert__error-list" role="list">
+                        {%- for field in form.errors -%}
+                          {%- if field == 'form' -%}
+                            <li class="alert__error-item">{{ form.errors.messages[field] }}</li>
+                          {%- else -%}
+                            <li class="alert__error-item">{{ form.errors.translated_fields[field] | capitalize }} {{ form.errors.messages[field] }}</li>
+                          {%- endif -%}
+                        {%- endfor -%}
+                      </ul>
+                    </div>
+                  {%- endif -%}
+                {%- endif -%}
+
+                <div class="form__input-row">
+                  <div class="form__input-wrapper form__input-wrapper--labelled">
+                    {%- assign form_author = form.author | default: customer.name -%}
+
+                    <input id="comment-form-name" type="text" class="form__field form__field--text {% if form_author != blank %}is-filled{% endif %}" name="comment[author]" value="{{ form_author | escape }}" required="required">
+                    <label for="comment-form-name" class="form__floating-label">{{ 'blog.comments.name' | t }}</label>
+                  </div>
+
+                  <div class="form__input-wrapper form__input-wrapper--labelled">
+                    {%- assign form_email = form.email | default: customer.email -%}
+
+                    <input id="comment-form-email" type="email" class="form__field form__field--text {% if form_email != blank %}is-filled{% endif %}" name="comment[email]" value="{{ form_email | escape }}" required="required">
+                    <label for="comment-form-email" class="form__floating-label">{{ 'blog.comments.email' | t }}</label>
+                  </div>
+                </div>
+
+                <div class="form__input-wrapper form__input-wrapper--labelled">
+                  <textarea id="comment-form-body" name="comment[body]" rows="5" class="form__field form__field--textarea {% if form.body != blank %}is-filled{% endif %}" required="required">{{ form.body }}</textarea>
+                  <label for="comment-form-body" class="form__floating-label">{{ 'blog.comments.content' | t }}</label>
+                </div>
+
+                <button type="submit" class="form__submit button button--primary button--min-width">{{ 'blog.comments.submit' | t }}</button>
+              </div>
+            {%- endform -%}
+          {%- endif -%}
+        </div>
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="blog-sidebar hidden-tablet">
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'newsletter' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--newsletter" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  <style>
+                    #block-{{ block.id }} {
+                      background: {{ block.settings.background }};
+                      color: {{ block.settings.text }};
+                    }
+                  </style>
+
+                  {%- if block.settings.title != blank -%}
+                    <h2 class="heading h3">{{ block.settings.title | escape }}</h2>
+                  {%- endif -%}
+
+                  {%- if block.settings.content != blank -%}
+                    <div class="rte">
+                      {{ block.settings.content }}
+                    </div>
+                  {%- endif -%}
+
+                  {%- assign newsletter_id = 'newsletter-' | append: block.id -%}
+
+                  <div class="newsletter newsletter--compact">
+                    {%- form 'customer', id: newsletter_id, class: 'form newsletter__form' -%}
+                      {%- if form.posted_successfully? -%}
+                        <p class="alert alert--success">{{ 'home_page.newsletter.success' | t }}</p>
+                      {%- else -%}
+                        {%- if form.errors -%}
+                          <p class="alert alert--error">{{ form.errors.messages['email'] }}</p>
+                        {%- endif -%}
+
+                        <input type="hidden" name="contact[tags]" value="newsletter">
+
+                        <div class="form__input-wrapper form__input-wrapper--labelled">
+                          <input type="email" name="contact[email]" class="form__field form__field--text form__field--borderless" aria-label="{{ 'home_page.newsletter.input' | t }}" required>
+                          <label for="newsletter[contact][email]" class="form__floating-label">{{ 'home_page.newsletter.input' | t }}</label>
+                        </div>
+
+                        <button type="submit" class="form__submit form__submit--tight button button--primary button--full">{{ 'home_page.newsletter.submit' | t }}</button>
+                      {%- endif -%}
+                    {%- endform -%}
+
+                    {%- if block.settings.subtext != blank -%}
+                      <p class="newsletter__text">{{ block.settings.subtext | escape }}</p>
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              {%- when 'featured_posts' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--posts" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  <ol class="blog-sidebar__post-list {% if block.settings.show_ranking %}blog-sidebar__post-list--ranked{% endif %}" role="list">
+                    {%- assign show_placeholder = true -%}
+
+                    {%- for i in (1..5) -%}
+                      {%- assign article_option = 'article_' | append: i -%}
+                      {%- assign article = block.settings[article_option] -%}
+
+                      {%- unless article == blank -%}
+                        <li class="blog-sidebar__post-item">
+                          {%- if article.image -%}
+                            <a href="{{ article.url }}" class="blog-sidebar__post-image-wrapper">
+                              <div class="blog-sidebar__post-image-overflow">
+                                <img loading="lazy" src="{{ article.image | img_url: '100x80', crop: 'center', scale: 2 }}" alt="{{ article.image.alt | escape }}" class="blog-sidebar__post-image">
+                              </div>
+                            </a>
+                          {%- endif -%}
+
+                          <div class="blog-sidebar__post-info">
+                            <a class="blog-sidebar__post-title text--strong link" href="{{ article.url }}">{{ article.title }}</a>
+
+                            {%- if block.settings.show_date or block.settings.show_category and article.tags.size > 0 -%}
+                              <div class="blog-sidebar__post-meta">
+                                {%- if block.settings.show_category and article.tags.size > 0 -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ article.tags.first }}</span>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_date -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ article.published_at | date: format: 'short_month_day_year' }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+                          </div>
+                        </li>
+
+                        {%- assign show_placeholder = false -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+
+                    {%- if show_placeholder -%}
+                      {%- for i in (1..3) -%}
+                        <li class="blog-sidebar__post-item">
+                          {%- if article.image -%}
+                            <a href="#" class="blog-sidebar__post-image-wrapper">
+                              <div class="blog-sidebar__post-image-overflow">
+                                {%- capture placeholder -%}{% cycle 'lifestyle-1', 'lifestyle-2' %}{%- endcapture -%}
+                                {{ placeholder | placeholder_svg_tag: 'blog-sidebar__post-placeholder placeholder-svg' }}
+                              </div>
+                            </a>
+                          {%- endif -%}
+
+                          <div class="blog-sidebar__post-info">
+                            <a class="blog-sidebar__post-title text--strong" href="#">{{ 'home_page.onboarding.article_title' | t }}</a>
+
+                            {%- if block.settings.show_date or block.settings.show_category -%}
+                              <div class="blog-sidebar__post-meta">
+                                {%- if block.settings.show_category -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ 'home_page.onboarding.article_category' | t }}</span>
+                                {%- endif -%}
+
+                                {%- if block.settings.show_date -%}
+                                  <span class="blog-sidebar__post-meta-item">{{ 'now' | date: format: 'short_month_day_year' }}</span>
+                                {%- endif -%}
+                              </div>
+                            {%- endif -%}
+                          </div>
+                        </li>
+                      {%- endfor -%}
+                    {%- endif -%}
+                  </ol>
+                </div>
+
+              {%- when 'rich_text' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--text" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  {%- if block.settings.content != blank -%}
+                    <div class="rte text--pull">
+                      {{ block.settings.content }}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+              {%- when 'featured_products' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--products" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  <div class="product-list product-list--horizontal">
+                    {%- assign show_placeholder = true -%}
+
+                    {%- for i in (1..3) -%}
+                      {%- assign product_option = 'product_' | append: i -%}
+                      {%- assign product = block.settings[product_option] -%}
+
+                      {%- unless product == blank -%}
+                        {%- render 'product-item', product: product, horizontal: true, hide_labels: true -%}
+                        {%- assign show_placeholder = false -%}
+                      {%- endunless -%}
+                    {%- endfor -%}
+
+                    {%- if show_placeholder -%}
+                      {%- for i in (1..2) -%}
+                        {%- render 'product-item-placeholder', horizontal: true -%}
+                      {%- endfor -%}
+                    {%- endif -%}
+                  </div>
+                </div>
+
+              {%- when 'links' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--menu" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- assign menu = linklists[block.settings.menu] -%}
+
+                  {%- unless menu.empty? -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ menu.title }}</p>
+
+                    <ul class="blog-sidebar__linklist" role="list">
+                      {%- for link in menu.links -%}
+                        <li class="blog-sidebar__link-item">
+                          <a href="{{ link.url }}" class="text--strong link">{{ link.title }}</a>
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+                  {%- endunless -%}
+                </div>
+
+              {%- when 'social_media' -%}
+                <div class="blog-sidebar__item blog-sidebar__item--social" id="block-{{ block.id }}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.title != blank -%}
+                    <p class="blog-sidebar__block-title heading h3">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+
+                  {%- capture social_media -%}{% render 'social-media', show_social_media_name: false %}{%- endcapture -%}
+
+                  {%- if social_media != blank -%}
+                    <div class="blog-sidebar__social-list">
+                      {{ social_media }}
+                    </div>
+                  {%- endif -%}
+                </div>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</article>
+
+{% schema %}
+{
+  "name": "Blog post",
+  "blocks": [
+    {
+      "type": "newsletter",
+      "name": "Newsletter",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Customers who subscribe will have their email address added to the \"accepts marketing\" [customer list](/admin/customers?query=&accepts_marketing=1)."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Join Us"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>A short sentence describing what someone will receive by subscribing</p>"
+        },
+        {
+          "type": "text",
+          "id": "subtext",
+          "label": "Sub-text",
+          "default": "100% free, Unsubscribe any time!"
+        },
+        {
+          "type": "color",
+          "id": "background",
+          "label": "Background",
+          "default": "#1e2d7d"
+        },
+        {
+          "type": "color",
+          "id": "text",
+          "label": "Text",
+          "default": "#ffffff"
+        }
+      ]
+    },
+    {
+      "type": "social_media",
+      "name": "Social media",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Make sure to have properly configured your social media in the theme settings."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Follow us"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rss",
+          "label": "Show RSS",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "featured_posts",
+      "name": "Blog posts",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Popular posts"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_ranking",
+          "label": "Show ranking",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_category",
+          "label": "Show category",
+          "info": "The first article's tag will be shown as category.",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_date",
+          "label": "Show date",
+          "default": true
+        },
+        {
+          "type": "article",
+          "id": "article_1",
+          "label": "Blog post 1"
+        },
+        {
+          "type": "article",
+          "id": "article_2",
+          "label": "Blog post 2"
+        },
+        {
+          "type": "article",
+          "id": "article_3",
+          "label": "Blog post 3"
+        },
+        {
+          "type": "article",
+          "id": "article_4",
+          "label": "Blog post 4"
+        },
+        {
+          "type": "article",
+          "id": "article_5",
+          "label": "Blog post 5"
+        }
+      ]
+    },
+    {
+      "type": "rich_text",
+      "name": "Rich text",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Your text"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Text",
+          "default": "<p>You can use this text to write about your brand.</p>"
+        }
+      ]
+    },
+    {
+      "type": "featured_products",
+      "name": "Featured products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Featured products"
+        },
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        }
+      ]
+    },
+    {
+      "type": "links",
+      "name": "Links",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu",
+          "label": "Menu",
+          "info": "This menu won't show dropdown items."
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_category",
+      "label": "Show category",
+      "info": "The first article's tag will be shown as category.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_share_buttons",
+      "label": "Show share buttons",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_gravatar",
+      "label": "Show comment avatar",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

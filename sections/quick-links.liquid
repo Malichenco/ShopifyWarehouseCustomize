@@ -1,0 +1,104 @@
+<section class="section {% unless section.settings.show_desktop %}hidden-lap-and-up{% endunless %}" data-section-id="{{ section.id }}" data-section-type="quick-links">
+  <div class="container">
+    {%- if section.settings.title != blank -%}
+      <header class="section__header">
+        <h2 class="section__title heading h3">{{ section.settings.title | escape }}</h2>
+        
+        {%- if section.settings.link_title != blank and section.settings.link != blank -%}
+          <a href="{{ section.settings.link }}" class="section__action-link link">{{ section.settings.link_title | escape }} {% render 'icon', icon: 'tail-right' %}</a>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div class="quick-links">
+      {%- for block in section.blocks -%}
+        <a href="{{ block.settings.link }}" class="quick-links__link {% if section.settings.expand_items %}quick-links__link--grow{% endif %} heading" {{ block.shopify_attributes }}>
+          {{- block.settings.title | escape -}}
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Quick links",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Quick links"
+    },
+    {
+      "type": "checkbox",
+      "id": "expand_items",
+      "label": "Expand items to fill row",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_desktop",
+      "label": "Show on desktop",
+      "info": "The section will be visible in the theme editor even if this option is unchecked to make editing easier.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "link_title",
+      "label": "Link title"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Your link"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "category": "Link",
+      "name": "Quick links",
+      "settings": {},
+      "blocks": [
+        {
+          "type": "link"
+        },
+        {
+          "type": "link"
+        },
+        {
+          "type": "link"
+        },
+        {
+          "type": "link"
+        },
+        {
+          "type": "link"
+        },
+        {
+          "type": "link"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
